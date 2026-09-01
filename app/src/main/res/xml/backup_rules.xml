@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Only the local progress file is eligible for backup. Nothing else exists. -->
+<full-backup-content>
+    <include
+        domain="file"
+        path="datastore/oro_club_progress.preferences_pb" />
+</full-backup-content>

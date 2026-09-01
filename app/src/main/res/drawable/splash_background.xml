@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Splash: flat theme colour + the app mark. No large bitmap is decoded here. -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@color/oro_ink" />
+    <item
+        android:gravity="center"
+        android:width="160dp"
+        android:height="160dp">
+        <bitmap
+            android:gravity="center"
+            android:src="@drawable/ic_launcher_foreground" />
+    </item>
+</layer-list>

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Base app theme. Compose draws everything; this only controls the window. -->
+    <style name="Theme.OroClub" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/oro_ink</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowLightStatusBar">false</item>
+    </style>
+
+    <!--
+      Splash: theme background colour only, no heavy asset.
+      The launcher icon is drawn by the system on top of oro_ink, so the very
+      first frame already looks like Oro Club instead of a white flash.
+    -->
+    <style name="Theme.OroClub.Splash" parent="Theme.OroClub">
+        <item name="android:windowBackground">@drawable/splash_background</item>
+    </style>
+
+</resources>

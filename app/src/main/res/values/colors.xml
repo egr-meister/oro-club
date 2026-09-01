@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Golden Joker Club palette (matched to the shipped artwork) -->
+    <color name="oro_gold">#FFF5C542</color>
+    <color name="oro_gold_dark">#FFB8860B</color>
+    <color name="oro_deep_royal">#FF0A142E</color>
+    <color name="oro_panel">#FF16264D</color>
+    <color name="oro_near_black">#FF05080F</color>
+    <color name="oro_ink">#FF01081A</color>
+    <color name="oro_correct">#FF2F8F5B</color>
+    <color name="oro_wrong">#FFB73A3A</color>
+    <color name="oro_white">#FFFFFFFF</color>
+</resources>

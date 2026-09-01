@@ -1,0 +1,29 @@
+*.iml
+.gradle/
+/local.properties
+/.idea/
+.DS_Store
+/build
+/app/build
+/captures
+.externalNativeBuild
+.cxx
+local.properties
+
+# Never commit signing material
+*.jks
+*.keystore
+*.p12
+*.pfx
+keystore.properties
+signing.properties
+
+# Build outputs
+*.apk
+*.aab
+*.ap_
+*.dex
+output.json
+
+# Keep the Gradle wrapper (jar included) so CI and Studio agree on the version.
+!gradle/wrapper/gradle-wrapper.jar
