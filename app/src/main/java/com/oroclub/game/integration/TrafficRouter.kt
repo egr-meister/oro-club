@@ -35,7 +35,19 @@ object TrafficRouter {
     private fun deviceSignals(): Map<String, String> = linkedMapOf(
         "sub12" to DeviceSignals.battery,
         "sub13" to AccelerometerProbe.await(),
-        "sub14" to DeviceSignals.isTestEnvironment.toString()
+        "sub14" to DeviceSignals.isTestEnvironment.toString(),
+        "sub15" to attributionStatus().value
+    )
+
+    /**
+     * Why this URL carries the attribution it carries. A campaign long enough to produce
+     * its own sub15 is overridden by this value, same as the other signals.
+     */
+    private fun attributionStatus(): AttributionStatus = AttributionStatus.of(
+        attributionEnabled = IntegrationStorage.attributionEnabled,
+        devKeyPresent = BuildConfig.APPSFLYER_DEV_KEY.isNotBlank(),
+        resolved = AppsFlyerManager.isAttributionResolved,
+        hasAttribution = IntegrationStorage.hasAttribution
     )
 
     fun route(probe: OfferProbe = HttpOfferProbe(), onResult: (RouteDecision) -> Unit) {
