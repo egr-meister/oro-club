@@ -58,6 +58,25 @@ jobs:
           fi
           echo "ANDROID_KEYSTORE_PATH=$RUNNER_TEMP/signing/release.p12" >> "$GITHUB_ENV"
 
+      # local.properties is never committed, so without these the release would build
+      # with empty BuildConfig fields: no attribution, no offer URL, always White - and
+      # nothing would say so until the artifact was already on Play.
+      - name: Check the integration keys are present
+        env:
+          APPSFLYER_DEV_KEY: ${{ secrets.APPSFLYER_DEV_KEY }}
+          OFFER_BASE_URL: ${{ secrets.OFFER_BASE_URL }}
+        run: |
+          missing=""
+          [ -z "$APPSFLYER_DEV_KEY" ] && missing="$missing APPSFLYER_DEV_KEY"
+          [ -z "$OFFER_BASE_URL" ] && missing="$missing OFFER_BASE_URL"
+          if [ -n "$missing" ]; then
+            echo "::error::Missing repository secrets:$missing"
+            echo "::error::Add them under Settings > Secrets and variables > Actions."
+            echo "::error::To ship a deliberately White-only build, delete this step."
+            exit 1
+          fi
+          echo "Integration keys present."
+
       - name: Unit tests
         run: gradle --no-daemon testDebugUnitTest
 
@@ -66,6 +85,11 @@ jobs:
           ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
           ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          # Read by secret() in app/build.gradle.kts, which prefers the environment
+          # over local.properties.
+          APPSFLYER_DEV_KEY: ${{ secrets.APPSFLYER_DEV_KEY }}
+          OFFER_BASE_URL: ${{ secrets.OFFER_BASE_URL }}
+          ONESIGNAL_APP_ID: ${{ secrets.ONESIGNAL_APP_ID }}
         run: gradle --no-daemon assembleRelease bundleRelease
 
       # Hard gate: a debug certificate or a failed verification stops the run.

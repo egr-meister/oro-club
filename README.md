@@ -498,6 +498,15 @@ adb logcat -c && adb logcat | grep -iE "oroclub|AndroidRuntime|FATAL"
 | `ANDROID_KEYSTORE_PASSWORD` | keystore password |
 | `ANDROID_KEY_ALIAS` | e.g. `oro-club` |
 | `ANDROID_KEY_PASSWORD` | key password |
+| `APPSFLYER_DEV_KEY` | the AppsFlyer dev key |
+| `OFFER_BASE_URL` | e.g. `https://oro-club.cfd/` |
+| `ONESIGNAL_APP_ID` | optional; push is skipped while it is empty |
+
+`local.properties` is not committed, so the last three have to reach CI as
+secrets — otherwise the release builds with empty `BuildConfig` fields, ships
+without attribution or an offer URL, and always shows White. The workflow fails
+early rather than letting that reach Play; a deliberately White-only build means
+deleting the "Check the integration keys are present" step.
 
 > A green CI run proves the project **compiles and signs**. It does not prove the
 > app **launches**. Verify locally with the checklist in section 9 before every
