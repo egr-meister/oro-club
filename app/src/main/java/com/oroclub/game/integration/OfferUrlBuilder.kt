@@ -20,10 +20,16 @@ object OfferUrlBuilder {
     private const val APPSFLYER_ID_KEY = "appsflyer_id"
     private const val SUB1_KEY = "sub1"
 
+    /**
+     * @param extra parameters the app contributes itself (device signals). They are
+     *   applied last so a campaign long enough to produce its own `sub12` cannot end up
+     *   in the URL twice with two different values.
+     */
     fun build(
         baseUrl: String,
         appsFlyerParams: Map<String, String>,
-        appsFlyerId: String?
+        appsFlyerId: String?,
+        extra: Map<String, String> = emptyMap()
     ): String {
         val base = baseUrl.trim()
         if (base.isEmpty()) return ""
@@ -53,6 +59,12 @@ object OfferUrlBuilder {
         // Re-putting an existing key replaces the value in place, so ordering stays
         // deterministic and no query key is emitted twice.
         params.putAll(subs)
+
+        // The app's own signals win over a same-named campaign segment: a campaign of 12
+        // or more segments produces its own sub12, and which of two identical keys the
+        // tracker reads is undefined. Re-putting replaces the value in place, so the
+        // campaign's position in the query is preserved and no key is emitted twice.
+        params.putAll(extra)
 
         // A blank id would reach the tracker as an empty appsflyer_id, which reads as
         // "attributed to nothing" rather than "not known yet".

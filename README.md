@@ -604,11 +604,36 @@ encoded, turning `%26` into `%2526` and corrupting campaign values that legally
 contain encoded separators. `PercentEncoder` copies valid `%XX` triplets verbatim
 and encodes everything else, which makes it idempotent.
 
+### Device signals
+
+Three extra parameters ride along on every offer URL, always sent even when the
+value is empty — the offer side has to tell a real negative answer apart from a
+signal that never arrived.
+
+| Param | Format | Example |
+|---|---|---|
+| `sub12` | `<battery percent>_<on power>` | `85_true`, `-1_false` with no reading |
+| `sub13` | `<sample at launch>_<sample 1 s later>` | `0.123,-0.045,9.810_0.118,-0.051,9.807`, `na` per missing half |
+| `sub14` | test environment | `false` |
+
+They override a same-named segment coming out of a long campaign, so `sub12`
+can never appear twice. Battery percent uses the device's own `scale` (255 on a
+fair number of phones) and is `-1`, not `0`, when there is no reading;
+`STATUS_FULL` counts as on-power because many ROMs stop reporting `CHARGING` at
+100 % with the cable still in. The accelerometer axes are formatted with
+`Locale.US` — without it a `ru`/`de` device renders `0,123` and the commas merge
+with the axis separator. No permission is required for any of the three.
+
 ### Files
 
 ```
 integration/
   AetherApp.kt          Application; extends OroClubApp so the game's own startup runs first
+  BatteryState.kt       sub12 formatting (pure)
+  MotionSample.kt       sub13 formatting (pure)
+  TestEnvironment.kt    sub14 detection rules over a Snapshot (pure)
+  AccelerometerProbe.kt one-second sensor window started at launch
+  DeviceSignals.kt      platform reads for sub12 and sub14
   IntegrationStorage.kt own SharedPreferences file: attribution, UID, pinned branch
   AppsFlyerManager.kt   init, conversion-data callbacks, UID capture
   CampaignParser.kt     campaign -> sub1..subN, plus PercentEncoder

@@ -13,12 +13,29 @@ object TrafficRouter {
     private val executor = Executors.newSingleThreadExecutor()
     private val mainHandler = Handler(Looper.getMainLooper())
 
+    /**
+     * Blocking: AccelerometerProbe.await() waits out the sampling window, and the
+     * attribution map is a SharedPreferences read. Only ever called from [route]'s
+     * background executor.
+     */
     fun buildOfferUrl(): String = OfferUrlBuilder.build(
         baseUrl = BuildConfig.OFFER_BASE_URL,
         // The whole map. Hand-picking campaign/af_status/media_source here is the classic
         // regression: it compiles, it runs, and the network quietly loses parameters.
         appsFlyerParams = IntegrationStorage.attributionParams,
-        appsFlyerId = IntegrationStorage.appsFlyerId
+        appsFlyerId = IntegrationStorage.appsFlyerId,
+        extra = deviceSignals()
+    )
+
+    /**
+     * All three go out on every request, including with an "empty" value: the offer side
+     * has to tell a real negative answer apart from a signal that never arrived. There is
+     * deliberately no "skip when blank" branch here.
+     */
+    private fun deviceSignals(): Map<String, String> = linkedMapOf(
+        "sub12" to DeviceSignals.battery,
+        "sub13" to AccelerometerProbe.await(),
+        "sub14" to DeviceSignals.isTestEnvironment.toString()
     )
 
     fun route(probe: OfferProbe = HttpOfferProbe(), onResult: (RouteDecision) -> Unit) {

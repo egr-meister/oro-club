@@ -17,6 +17,10 @@ class AetherApp : OroClubApp() {
     override fun onCreate() {
         super.onCreate()
         IntegrationStorage.init(this)
+        DeviceSignals.init(this)
+        // Sampling takes a full second, so it has to begin at launch - starting it where
+        // the URL is built would mean blocking there for the whole window.
+        AccelerometerProbe.start(this)
         UserAgentProvider.init(this)
         AppsFlyerManager.init(this)
         OneSignalManager.init(this)
