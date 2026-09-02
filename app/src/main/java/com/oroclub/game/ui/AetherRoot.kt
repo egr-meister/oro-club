@@ -1,10 +1,15 @@
 package com.oroclub.game.ui
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -16,15 +21,22 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.oroclub.game.data.GameRepository
 import com.oroclub.game.integration.AppsFlyerManager
 import com.oroclub.game.integration.DeepLinkRouter
 import com.oroclub.game.integration.IntegrationStorage
 import com.oroclub.game.integration.RouteDecision
 import com.oroclub.game.integration.TrafficRouter
+import com.oroclub.game.ui.components.LoadingSweep
 import com.oroclub.game.ui.components.OroBackground
 import com.oroclub.game.ui.nav.OroNavGraph
 import com.oroclub.game.ui.screens.OfferWebViewScreen
+import com.oroclub.game.ui.theme.TextMuted
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlin.coroutines.resume
@@ -77,16 +89,44 @@ fun AetherRoot(repository: GameRepository) {
     }
 }
 
-/** The club wordmark on the game's own background - no new loading style is introduced. */
+/**
+ * The club wordmark on the game's own background, plus a moving loading bar.
+ *
+ * This screen can be held for several seconds while attribution resolves and the routing
+ * probe runs. A still image reads as a frozen app, so something has to move.
+ */
 @Composable
 private fun SplashContent() {
     OroBackground {
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
             Image(
                 painter = painterResource(Assets.logo),
                 contentDescription = "Oro Club",
                 contentScale = ContentScale.Fit,
                 modifier = Modifier.fillMaxWidth(0.7f).aspectRatio(Assets.LOGO_ASPECT)
+            )
+            LoadingSweep(
+                modifier = Modifier
+                    .fillMaxWidth(0.52f)
+                    .offset(y = (-16).dp)
+            )
+            Text(
+                text = "LOADING",
+                color = TextMuted,
+                fontSize = 11.sp,
+                letterSpacing = 3.sp,
+                textAlign = TextAlign.Center,
+                style = MaterialTheme.typography.labelMedium,
+                modifier = Modifier
+                    .padding(top = 14.dp)
+                    .offset(y = (-16).dp)
+                    // The bar already says "working"; the word is for screen readers and
+                    // for anyone who reads text before they notice motion.
+                    .semantics { contentDescription = "Loading Oro Club" }
             )
         }
     }

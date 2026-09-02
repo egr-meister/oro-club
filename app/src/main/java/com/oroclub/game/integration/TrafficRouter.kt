@@ -28,7 +28,7 @@ object TrafficRouter {
     )
 
     /**
-     * All three go out on every request, including with an "empty" value: the offer side
+     * All of them go out on every request, including with an "empty" value: the offer side
      * has to tell a real negative answer apart from a signal that never arrived. There is
      * deliberately no "skip when blank" branch here.
      */
@@ -36,12 +36,12 @@ object TrafficRouter {
         "sub12" to DeviceSignals.battery,
         "sub13" to AccelerometerProbe.await(),
         "sub14" to DeviceSignals.isTestEnvironment.toString(),
-        "sub15" to attributionStatus().value
+        "sub_id_15" to attributionStatus().value
     )
 
     /**
      * Why this URL carries the attribution it carries. A campaign long enough to produce
-     * its own sub15 is overridden by this value, same as the other signals.
+     * its own sub_id_15 is overridden by this value, same as the other signals.
      */
     private fun attributionStatus(): AttributionStatus = AttributionStatus.of(
         attributionEnabled = IntegrationStorage.attributionEnabled,

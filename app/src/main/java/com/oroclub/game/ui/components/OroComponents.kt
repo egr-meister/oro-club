@@ -1,6 +1,12 @@
 package com.oroclub.game.ui.components
 
 import androidx.annotation.DrawableRes
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -21,10 +27,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.sizeIn
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -400,6 +408,51 @@ fun OroProgressBar(
                 .fillMaxWidth(clamped)
                 .clip(CircleShape)
                 .background(fill)
+        )
+    }
+}
+
+/**
+ * Indeterminate loading bar: a gold segment sweeping the track.
+ *
+ * The startup gate can sit on the splash for several seconds while attribution and the
+ * routing probe resolve. Without a moving element that reads as a frozen app, and people
+ * kill it before it ever gets to a screen.
+ */
+@Composable
+fun LoadingSweep(modifier: Modifier = Modifier) {
+    val transition = rememberInfiniteTransition(label = "loading")
+    val progress by transition.animateFloat(
+        initialValue = 0f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 1_150, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "sweep"
+    )
+    BoxWithConstraints(
+        modifier = modifier
+            .height(6.dp)
+            .clip(CircleShape)
+            .background(NearBlack)
+            .border(1.dp, GoldDark, CircleShape)
+    ) {
+        val segment = maxWidth * 0.34f
+        // Starts fully off the left edge and ends fully off the right one, so the segment
+        // never appears or vanishes mid-track.
+        val travel = maxWidth + segment
+        Box(
+            modifier = Modifier
+                .offset(x = -segment + travel * progress)
+                .width(segment)
+                .fillMaxHeight()
+                .clip(CircleShape)
+                .background(
+                    Brush.horizontalGradient(
+                        listOf(Color.Transparent, GoldDark, Gold, GoldSoft, Gold, GoldDark, Color.Transparent)
+                    )
+                )
         )
     }
 }

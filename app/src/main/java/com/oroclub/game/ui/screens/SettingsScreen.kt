@@ -1,5 +1,9 @@
 package com.oroclub.game.ui.screens
 
+import android.content.Context
+import android.content.Intent
+import android.net.Uri
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -25,6 +29,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
@@ -51,6 +56,7 @@ fun SettingsScreen(
     onBack: () -> Unit
 ) {
     var confirmVisible by remember { mutableStateOf(false) }
+    val context = LocalContext.current
 
     Box(modifier = Modifier.fillMaxSize()) {
         OroScreen(title = "Settings", onBack = onBack) {
@@ -103,10 +109,26 @@ fun SettingsScreen(
                 GoldDivider(modifier = Modifier.align(Alignment.CenterHorizontally))
 
                 BodyText(
-                    text = "Oro Club stores everything on this device: best quiz scores, " +
-                        "cleared levels and this switch. There is no account, no network " +
-                        "access and no analytics.",
+                    // Kept accurate on purpose: the game's own data really is local, but
+                    // the app as a whole does use the network, and claiming otherwise on
+                    // a screen that sits next to the privacy policy would be a lie.
+                    text = "Your game progress — best quiz scores, cleared levels and this " +
+                        "switch — is stored on this device only. There is no account.",
                     modifier = Modifier.fillMaxWidth()
+                )
+
+                PlateButton(
+                    text = "POLICY",
+                    onClick = { openUrl(context, POLICY_URL) },
+                    modifier = Modifier.fillMaxWidth(0.8f).align(Alignment.CenterHorizontally),
+                    contentDescription = "Privacy policy, opens in your browser"
+                )
+
+                PlateButton(
+                    text = "SUPPORT",
+                    onClick = { openUrl(context, SUPPORT_URL) },
+                    modifier = Modifier.fillMaxWidth(0.8f).align(Alignment.CenterHorizontally),
+                    contentDescription = "Support, opens in your browser"
                 )
 
                 PlateButton(
@@ -142,4 +164,23 @@ fun SettingsScreen(
             )
         }
     }
+}
+
+private const val POLICY_URL = "https://telegra.ph/Privacy-Policy--Oro-Club-09-02"
+private const val SUPPORT_URL = "https://telegra.ph/Support-09-02-3"
+
+/**
+ * Opens a link in the user's browser rather than in the app.
+ *
+ * FLAG_ACTIVITY_NEW_TASK because the target lands in its own task, and the whole call is
+ * fenced: a device with no browser at all would otherwise crash the settings screen on a
+ * tap, and a dead link is a far smaller problem than that.
+ */
+private fun openUrl(context: Context, url: String) {
+    runCatching {
+        context.startActivity(
+            Intent(Intent.ACTION_VIEW, Uri.parse(url))
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        )
+    }.onFailure { Log.w("SettingsScreen", "Could not open $url", it) }
 }

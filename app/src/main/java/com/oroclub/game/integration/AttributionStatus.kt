@@ -1,7 +1,7 @@
 package com.oroclub.game.integration
 
 /**
- * sub15: why the offer URL carries the attribution it carries.
+ * sub_id_15: why the offer URL carries the attribution it carries.
  *
  * Without it every URL that arrives without campaign data looks the same on the tracker,
  * and four different causes are indistinguishable: this install was held back, the build

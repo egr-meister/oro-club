@@ -534,6 +534,9 @@ defaults. Uninstalling the app removes the DataStore file entirely.
 * English only. All copy is inline in the composables rather than in
   `strings.xml`, which keeps the code readable but means adding a language is a
   refactor, not a translation drop-in.
+* The app runs full-screen: the status and navigation bars are hidden and come
+  back only as transient bars on an edge swipe. Screens keep their safeDrawing
+  padding so a transient bar never covers content.
 * Portrait only by design. On large-screen Android 15+ devices the system may
   ignore the orientation lock; the layouts scroll, so they degrade gracefully,
   but they are not tablet-optimised.
@@ -632,7 +635,7 @@ A held-back install still routes normally — it just carries no attribution:
   itself resolved immediately, so there is no 8-second splash;
 * the offer URL goes out without `campaign`, `af_status`, `media_source`,
   `sub1..subN` and `appsflyer_id` — and with no `sub1` there is no path segment
-  either, so the tracker sees a bare `OFFER_BASE_URL` plus `sub12`/`sub13`/`sub14`/`sub15`;
+  either, so the tracker sees a bare `OFFER_BASE_URL` plus `sub12`/`sub13`/`sub14`/`sub_id_15`;
 * OneSignal never gets an `external_id`, because that is the AppsFlyer UID, so
   those installs cannot be addressed by external id in a push campaign.
 
@@ -647,9 +650,9 @@ signal that never arrived.
 | `sub12` | `<battery percent>_<on power>` | `85_true`, `-1_false` with no reading |
 | `sub13` | `<sample at launch>_<sample 1 s later>` | `0.123,-0.045,9.810_0.118,-0.051,9.807`, `na` per missing half |
 | `sub14` | test environment | `false` |
-| `sub15` | why this URL carries the attribution it carries | `ok` |
+| `sub_id_15` | why this URL carries the attribution it carries | `ok` |
 
-`sub15` exists because every URL that arrives without campaign data otherwise
+`sub_id_15` exists because every URL that arrives without campaign data otherwise
 looks identical on the tracker, whatever the cause:
 
 | Value | Meaning |
