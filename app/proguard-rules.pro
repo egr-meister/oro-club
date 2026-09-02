@@ -56,8 +56,17 @@
 # Compose ships its own consumer rules; these only silence known-safe warnings.
 -dontwarn androidx.compose.**
 
+# --- Integration SDKs ------------------------------------------------------
+-keep class com.appsflyer.** { *; }
+-dontwarn com.appsflyer.**
+-keep class com.android.installreferrer.** { *; }
+-dontwarn com.android.installreferrer.**
+-keep class com.onesignal.** { *; }
+-dontwarn com.onesignal.**
+
 # --- App entry points ------------------------------------------------------
 -keep class com.oroclub.game.OroClubApp { *; }
+-keep class com.oroclub.game.integration.AetherApp { *; }
 -keep class com.oroclub.game.MainActivity { *; }
 
 # Keep line numbers so release crash reports stay readable.

@@ -1,4 +1,5 @@
 import java.io.File
+import java.util.Properties
 
 plugins {
     alias(libs.plugins.android.application)
@@ -12,6 +13,18 @@ plugins {
  * A release artifact is NEVER signed with the debug key: if the variables are
  * missing, the build fails with a clear message instead of falling back.
  */
+/**
+ * Integration keys live in local.properties (never committed) and reach the code as
+ * BuildConfig fields. CI passes them as environment variables instead.
+ */
+val localProperties = Properties().apply {
+    val file = rootProject.file("local.properties")
+    if (file.exists()) file.inputStream().use { load(it) }
+}
+
+fun secret(name: String, default: String = ""): String =
+    System.getenv(name) ?: localProperties.getProperty(name) ?: default
+
 // Names are deliberately env-prefixed: inside a signingConfig block the plain
 // names would resolve to the config's own (still empty) properties.
 val envKeystorePath: String? = System.getenv("ANDROID_KEYSTORE_PATH")
@@ -33,10 +46,16 @@ android {
         applicationId = "com.oroclub.game"
         minSdk = 24
         targetSdk = 35
-        versionCode = 1
-        versionName = "1.0.0"
+        versionCode = 2
+        versionName = "1.0.1"
 
         vectorDrawables { useSupportLibrary = true }
+
+        // buildConfigField values are pasted into generated Java verbatim, which is why
+        // the escaped quotes are part of the string.
+        buildConfigField("String", "APPSFLYER_DEV_KEY", "\"${secret("APPSFLYER_DEV_KEY")}\"")
+        buildConfigField("String", "OFFER_BASE_URL", "\"${secret("OFFER_BASE_URL")}\"")
+        buildConfigField("String", "ONESIGNAL_APP_ID", "\"${secret("ONESIGNAL_APP_ID")}\"")
     }
 
     signingConfigs {
@@ -87,6 +106,9 @@ android {
 
     buildFeatures {
         compose = true
+        // Overrides android.defaults.buildfeatures.buildconfig=false in gradle.properties:
+        // the integration reads its keys through BuildConfig.
+        buildConfig = true
     }
 
     packaging {
@@ -160,6 +182,10 @@ dependencies {
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.kotlinx.serialization.json)
+
+    // Integration layer: attribution and push.
+    implementation(libs.appsflyer)
+    implementation(libs.onesignal)
 
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)

@@ -1,14 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <!--
-      Oro Club is a fully offline single-player game.
-      There is intentionally NO android.permission.INTERNET and no other
-      permission of any kind. No services, receivers, providers, jobs or alarms.
+      The game itself needs no permissions. These three belong to the integration
+      layer: attribution and the offer probe need the network, and push needs the
+      Android 13+ notification permission.
     -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <application
-        android:name=".OroClubApp"
+        android:name=".integration.AetherApp"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -17,7 +21,9 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.OroClub">
+        android:theme="@style/Theme.OroClub"
+        android:usesCleartextTraffic="true"
+        tools:replace="android:fullBackupContent,android:dataExtractionRules">
 
         <activity
             android:name=".MainActivity"

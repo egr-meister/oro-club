@@ -13,8 +13,11 @@ import kotlinx.coroutines.launch
 /**
  * Composition root. The repository is created exactly once here and handed to
  * simple ViewModel factories — no DI framework is used anywhere in the project.
+ *
+ * Open because the integration layer extends it: `AetherApp` adds the attribution and
+ * routing startup on top of this one, rather than replacing it.
  */
-class OroClubApp : Application() {
+open class OroClubApp : Application() {
 
     lateinit var repository: GameRepository
         private set

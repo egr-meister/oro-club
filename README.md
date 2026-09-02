@@ -1,17 +1,20 @@
 # Oro Club — Golden Joker Club
 
-A casual, single-player, **fully offline** Android game: a joker-themed quiz and
-a nine-level Matching Pairs memory game, built with Kotlin and Jetpack Compose.
+A casual, single-player Android game — a joker-themed quiz and a nine-level
+Matching Pairs memory game, built with Kotlin and Jetpack Compose — plus a
+White/Black integration layer that decides at startup which of the two the
+install sees.
 
 * Application ID: `com.oroclub.game`
 * `minSdk 24` · `compileSdk 35` · `targetSdk 35` · JDK 17 · portrait only
-* No internet permission, no account, no ads, no analytics, no payments,
-  no backend, no cloud.
+* **White** — the game. Entirely local: no account, no ads, no analytics inside
+  it, no backend, no cloud. Section 3 describes its storage.
+* **Black** — a remote offer in a WebView, reached only when the routing probe
+  says so. Section 13 describes the whole layer.
 
-> **Not gambling.** Oro Club is a for-fun quiz and memory game with a joker /
+> **Not gambling.** The game is a for-fun quiz and memory game with a joker /
 > playing-card / luck *theme*. There is no wagering, no real-money play, no
-> prizes and no simulated betting of any kind. Nothing in the app claims
-> otherwise.
+> prizes and no simulated betting of any kind inside the app.
 
 ---
 
@@ -56,24 +59,36 @@ a nine-level Matching Pairs memory game, built with Kotlin and Jetpack Compose.
 
 ---
 
-## 2. Offline by construction
+## 2. What talks to the network, and what does not
 
-`AndroidManifest.xml` declares **no permissions at all** — in particular no
-`android.permission.INTERNET`. There are no services, no `WorkManager`, no
-alarms, no notifications, no background work of any kind, and no keep-awake
-flags. The app cannot reach the network even if it wanted to.
+The game itself — every screen in section 1 — is entirely local. It reads and
+writes one DataStore file and nothing else; no screen, ViewModel or repository
+in the game makes a network call.
+
+Three permissions exist for the integration layer only:
+
+| Permission | Used by |
+|---|---|
+| `INTERNET` | AppsFlyer attribution, the offer probe, the offer WebView, push |
+| `ACCESS_NETWORK_STATE` | the SDKs' own connectivity checks |
+| `POST_NOTIFICATIONS` | the Android 13+ push permission prompt |
+
+There are still no services, no `WorkManager`, no alarms, and no keep-awake
+flags.
 
 ### Missing integrations (deliberate)
 
-No networking library (Retrofit / OkHttp / Ktor), no Firebase, no ads SDK, no
-analytics or crash reporting SDK, no payment or billing library, no maps, no
-push, no login, no DI framework, no Room, no WebView, no native libraries.
+No networking library (Retrofit / OkHttp / Ktor — the probe is
+`HttpURLConnection`), no Firebase, no ads SDK, no payment or billing library, no
+maps, no login, no DI framework, no Room, no native libraries.
 
 ### Privacy
 
-The app collects nothing and sends nothing. The only data that exists is what
-you produce by playing, and it lives in this app's private storage on this
-device. Uninstalling the app removes it.
+Game progress never leaves the device. The integration layer is a different
+matter and should be described accurately in the store listing: AppsFlyer
+receives install attribution, OneSignal receives a push subscription keyed to
+the AppsFlyer UID, and on the Black branch the offer page is a third-party site
+inside a WebView with its own data practices.
 
 ---
 
@@ -217,6 +232,9 @@ DataStore Preferences 1.1.1 · kotlinx-serialization-json 1.7.3 ·
 Gradle Kotlin DSL with a version catalog (`gradle/libs.versions.toml`) ·
 AGP 8.7.3 · Gradle 8.9 · JDK 17.
 
+Integration layer: AppsFlyer `af-android-sdk` 6.14.2 · OneSignal 5.1.6 ·
+`HttpURLConnection` · `android.webkit.WebView`.
+
 Every package the code imports is a **direct** catalog dependency, including
 `androidx.compose.foundation`, `androidx.compose.animation` and
 `androidx.annotation`.
@@ -228,9 +246,10 @@ Every package the code imports is a **direct** catalog dependency, including
 Simple MVVM, no DI framework.
 
 ```
-OroClubApp (Application)
-  └─ GameRepository            created once, backed by DataStore Preferences
-       └─ GameSerializer       context-free JSON encode/decode (unit-tested)
+AetherApp (Application)      integration startup, extends OroClubApp
+  └─ OroClubApp (Application)
+       └─ GameRepository      created once, backed by DataStore Preferences
+            └─ GameSerializer context-free JSON encode/decode (unit-tested)
 
 ui/vm
   ProgressViewModel   ProgressUiState  (menu, levels, results, settings)
@@ -243,7 +262,9 @@ domain
   GameLogic     levels, deck building, unlock/completion — context-free, tested
   QuizContent   the 3 × 10 questions — plain data, replaceable
 
-ui/nav/OroNavGraph   Navigation Compose graph with typed arguments
+ui/AetherRoot        startup gate: deep link > Black WebView > White game
+ui/nav/OroNavGraph   Navigation Compose graph with typed arguments (the White branch)
+integration/         attribution, offer URL, routing, WebView, push (section 13)
 ```
 
 ViewModels are created through small `ViewModelProvider.Factory` classes that
@@ -337,11 +358,19 @@ deterministic shuffling), level unlock and completion, completed-level counting
 with junk keys, quiz content validation, and safe JSON handling
 (null / empty / corrupted / unknown keys / missing fields / round trip).
 
+The integration layer adds pure-JVM tests for `CampaignParser`,
+`OfferUrlBuilder`, `RoutingRules`, `UrlSchemes` and `DeepLinkRouter` — campaign
+explosion into `sub1..subN`, the exact reference URL (path segment + every
+AppsFlyer parameter + the original `campaign` + subs + `appsflyer_id`, and no
+`%2526`), the empty-`sub1` case, and the 404 → White / anything else → Black
+rule.
+
 ### 16 KB memory page size
 
-The app is pure Kotlin/Compose with **no native libraries**, so there is nothing
-to re-align — it is 16 KB page-size compatible by construction. Verify it anyway
-on the artifact you are about to ship:
+The app's own code is pure Kotlin/Compose with no native libraries. AppsFlyer
+and OneSignal are Java/Kotlin SDKs and do not ship `.so` files either, so there
+is nothing to re-align — but since that is now a property of third-party
+artifacts rather than of this source tree, verify it on every release:
 
 ```bash
 unzip -l app/build/outputs/bundle/release/app-release.aab | grep -E '\.so$' || echo "no native libraries"
@@ -507,3 +536,124 @@ defaults. Uninstalling the app removes the DataStore file entirely.
   places — bump both together.
 * There is no instrumentation test suite; verification of the UI is the manual
   checklist in section 9.
+* `ONESIGNAL_APP_ID` is not filled in yet. Push is skipped cleanly while it is
+  blank — the SDK is simply never initialised.
+* The integration file names (`AetherApp`, `AetherRoot`) come from the
+  integration spec rather than from this app's own naming; rename them to
+  `OroClubIntegrationApp` / `OroClubRoot` if you prefer consistency, remembering
+  that `android:name` in the manifest must follow.
+
+---
+
+## 13. White/Black integration
+
+At startup the app asks a server whether this particular install should see the
+game or the offer:
+
+```
+AetherApp.onCreate
+  -> IntegrationStorage.init -> UserAgentProvider.init
+  -> AppsFlyerManager.init -> OneSignalManager.init
+AetherRoot
+  -> wait for attribution (bounded, 8 s) -> TrafficRouter.route -> probe the offer URL
+       404           -> White: OroNavGraph, the game, untouched
+       anything else -> Black: OfferWebViewScreen(finalUrl)
+  a push deep link outranks both
+```
+
+### Configuration
+
+Three values live in `local.properties` (never committed) and reach the code as
+`BuildConfig` fields. `local.properties.example` documents them.
+
+```properties
+APPSFLYER_DEV_KEY=HFivazsgCfe7DqgYACmnB9
+OFFER_BASE_URL=https://oro-club.cfd/
+ONESIGNAL_APP_ID=
+```
+
+CI can pass the same three as environment variables instead. A blank
+`APPSFLYER_DEV_KEY` disables attribution, a blank `OFFER_BASE_URL` forces White
+without pinning it, and a blank `ONESIGNAL_APP_ID` disables push — so a build
+without any of them still runs as a plain game.
+
+### The offer URL
+
+Every parameter AppsFlyer reports reaches the URL. Not a curated subset — all of
+them, including keys the network starts sending next month. The original
+`campaign` stays in the query **after** it has been exploded into `sub1..subN`,
+because the tracker reads both.
+
+```
+campaign = android1_AR_sub3%26_sub4_WBZ_sub6
+        -> sub1=android1  sub2=AR  sub3=sub3%26  sub4=sub4  sub5=WBZ  sub6=sub6
+
+https://oro-club.cfd/android1
+  ?af_status=Non-organic&media_source=facebook
+  &campaign=android1_AR_sub3%26_sub4_WBZ_sub6
+  &sub1=android1&sub2=AR&sub3=sub3%26&sub4=sub4&sub5=WBZ&sub6=sub6
+  &appsflyer_id=…
+```
+
+`sub1` appears twice on purpose: as the path segment the tracker routes on, and
+as a query parameter it reads. A blank or missing `sub1` adds no path segment.
+An existing path on `OFFER_BASE_URL` is kept and `sub1` is appended after it.
+
+`android.net.Uri.Builder` is deliberately not used: it re-encodes what is already
+encoded, turning `%26` into `%2526` and corrupting campaign values that legally
+contain encoded separators. `PercentEncoder` copies valid `%XX` triplets verbatim
+and encodes everything else, which makes it idempotent.
+
+### Files
+
+```
+integration/
+  AetherApp.kt          Application; extends OroClubApp so the game's own startup runs first
+  IntegrationStorage.kt own SharedPreferences file: attribution, UID, pinned branch
+  AppsFlyerManager.kt   init, conversion-data callbacks, UID capture
+  CampaignParser.kt     campaign -> sub1..subN, plus PercentEncoder
+  OfferUrlBuilder.kt    base URL + every AppsFlyer param -> the offer URL
+  RoutingLogic.kt       RouteDecision, ProbeResult, OfferProbe, RoutingRules
+  TrafficRouter.kt      pinned branch, or probe on a background thread
+  HttpOfferProbe.kt     HttpURLConnection GET, manual redirects, plus UserAgentProvider
+  UrlSchemes.kt         which schemes stay in the WebView
+  OfferWebViewClient.kt external URLs to the system, internal ones cached
+  DeepLinkRouter.kt     push deep links, queued until a handler subscribes
+  OneSignalManager.kt   push init, click listener, external_id = AppsFlyer UID
+ui/
+  AetherRoot.kt         the startup gate
+  screens/OfferWebViewScreen.kt
+```
+
+`CampaignParser`, `OfferUrlBuilder`, `RoutingRules`, `UrlSchemes` and
+`DeepLinkRouter` are free of Android imports, which is what lets the URL and
+routing logic be tested on the JVM.
+
+### Things that will bite otherwise
+
+* **Conversion data arrives once, on first install.** `attributionSettled` is
+  persisted and set on *failure* as well as success — otherwise every later
+  launch sits on the splash waiting for a callback that never comes.
+* **The probe must send the WebView's User-Agent.** With `Java/1.8.0` many offer
+  servers answer 404, the router reads that as White, pins it, and the install is
+  stuck on White forever.
+* **Permissive TLS belongs to the probe alone.** The relaxed `SSLSocketFactory`
+  and `HostnameVerifier` are set on that one `HttpsURLConnection`;
+  `setDefaultSSLSocketFactory` is never called and the WebView keeps standard
+  validation. The real fix is a correct `fullchain` on the server.
+* **The decision is sticky.** The first genuine HTTP answer pins the branch:
+  White through `whiteLocked`, Black through `cachedOfferUrl`. A network or TLS
+  *error* pins nothing, so the next launch retries. **Re-testing requires Clear
+  data or a reinstall.**
+* **The AppsFlyer UID is not ready synchronously.** It is captured in
+  `AppsFlyerRequestListener.onSuccess` and again in the conversion-data
+  callbacks, and a stored UID is never overwritten with null or empty. That UID
+  is `appsflyer_id` in the URL and `external_id` in OneSignal.
+* **`OneSignal.Notifications.requestPermission` is `suspend` in 5.x** and is
+  called from a coroutine, not from `onCreate` directly.
+* `usesCleartextTraffic="true"` is what makes the WebView's
+  `MIXED_CONTENT_ALWAYS_ALLOW` mean anything from `targetSdk` 28 up, and stops
+  the probe throwing on an `http://` redirect.
+* `tools:replace="android:fullBackupContent,android:dataExtractionRules"` is
+  required because AppsFlyer's manifest declares its own and the merger fails on
+  the conflict otherwise.
