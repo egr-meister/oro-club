@@ -186,6 +186,8 @@ dependencies {
     // Integration layer: attribution and push.
     implementation(libs.appsflyer)
     implementation(libs.onesignal)
+    // Re-enables the X-Requested-With header the WebView stopped sending in M108.
+    implementation(libs.androidx.webkit)
 
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)

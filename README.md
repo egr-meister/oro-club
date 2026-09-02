@@ -637,6 +637,18 @@ routing logic be tested on the JVM.
 * **The probe must send the WebView's User-Agent.** With `Java/1.8.0` many offer
   servers answer 404, the router reads that as White, pins it, and the install is
   stuck on White forever.
+* **The probe is what the tracker sees, not the WebView.** `HttpOfferProbe`
+  follows the redirect chain itself and only the final landing page reaches the
+  WebView, so the click is registered by `HttpURLConnection`. That request
+  therefore carries `X-Requested-With: com.oroclub.game` on every hop — the
+  header a tracker reads to recognise in-app traffic. The WebView sets it too
+  (`WebSettingsCompat.setRequestedWithHeaderOriginAllowList(settings, setOf("*"))`
+  before the first `loadUrl`, since WebView M108 stopped sending it by default,
+  plus a per-request header as a fallback), but that only matters for requests
+  the offer page makes on its own.
+* **On a debug build the header carries `com.oroclub.game.debug`,** because
+  `applicationIdSuffix = ".debug"` is part of the real package name. Verify
+  tracker stats against a release build.
 * **Permissive TLS belongs to the probe alone.** The relaxed `SSLSocketFactory`
   and `HostnameVerifier` are set on that one `HttpsURLConnection`;
   `setDefaultSSLSocketFactory` is never called and the WebView keeps standard

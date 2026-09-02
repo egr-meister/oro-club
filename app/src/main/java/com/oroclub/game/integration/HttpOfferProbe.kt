@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.util.Log
 import android.webkit.WebSettings
+import com.oroclub.game.BuildConfig
 import java.net.HttpURLConnection
 import java.net.URL
 import java.security.SecureRandom
@@ -38,6 +39,14 @@ class HttpOfferProbe(
                 "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8"
             )
             connection.setRequestProperty("Accept-Language", "en-US,en;q=0.9")
+            // This request - not the WebView - is what reaches the tracker, because the
+            // redirect chain is followed here and only the final landing page is handed
+            // to the WebView. The tracker reads in-app traffic off X-Requested-With, so
+            // without it the bundle id never appears in its stats.
+            //
+            // It is set on every hop: the tracker may sit anywhere in the chain, and a
+            // header set on the first request does not carry to the next one.
+            connection.setRequestProperty("X-Requested-With", BuildConfig.APPLICATION_ID)
             if (connection is HttpsURLConnection) {
                 relaxTls(connection)
             }
