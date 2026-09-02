@@ -16,6 +16,7 @@ object IntegrationStorage {
     private const val KEY_APPSFLYER_ID = "appsflyer_id"
     private const val KEY_CACHED_OFFER_URL = "cached_offer_url"
     private const val KEY_WHITE_LOCKED = "white_locked"
+    private const val KEY_ATTRIBUTION_ENABLED = "attribution_enabled"
 
     private lateinit var prefs: SharedPreferences
 
@@ -81,6 +82,22 @@ object IntegrationStorage {
             if (value.isNullOrBlank()) return
             prefs.edit().putString(KEY_APPSFLYER_ID, value).apply()
         }
+
+    // --- attribution rollout -------------------------------------------------
+
+    /**
+     * Whether the AppsFlyer holdback has already been drawn for this install. The draw
+     * happens once and is then permanent: re-drawing on a later launch would start the
+     * SDK days after the install it was supposed to attribute, and report that install
+     * as organic.
+     */
+    val hasAttributionRolloutDecision: Boolean
+        get() = prefs.contains(KEY_ATTRIBUTION_ENABLED)
+
+    /** Defaults to true so a storage failure never silently disables attribution. */
+    var attributionEnabled: Boolean
+        get() = prefs.getBoolean(KEY_ATTRIBUTION_ENABLED, true)
+        set(value) = prefs.edit().putBoolean(KEY_ATTRIBUTION_ENABLED, value).apply()
 
     // --- routing decision ----------------------------------------------------
 

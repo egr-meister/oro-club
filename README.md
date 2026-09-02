@@ -613,6 +613,29 @@ encoded, turning `%26` into `%2526` and corrupting campaign values that legally
 contain encoded separators. `PercentEncoder` copies valid `%XX` triplets verbatim
 and encodes everything else, which makes it idempotent.
 
+### Attribution holdback
+
+One install in `AttributionRollout.DEFAULT_HOLDBACK_EVERY_NTH` (5) never starts
+AppsFlyer at all. The draw happens once, on the first launch, and is stored in
+`IntegrationStorage.attributionEnabled` — re-drawing on a later launch would
+start the SDK days after the install it was meant to attribute and report that
+install as organic. Set the constant to `0` to switch the holdback off.
+
+It is a random draw per install, not a counter: a device cannot know how many
+installs came before it. Over enough installs it averages to 20 % (measured
+20.02 % over 200 000 draws), but any given run of five is not guaranteed to hold
+back exactly one.
+
+A held-back install still routes normally — it just carries no attribution:
+
+* startup does not wait for a callback that will never come; the manager marks
+  itself resolved immediately, so there is no 8-second splash;
+* the offer URL goes out without `campaign`, `af_status`, `media_source`,
+  `sub1..subN` and `appsflyer_id` — and with no `sub1` there is no path segment
+  either, so the tracker sees a bare `OFFER_BASE_URL` plus `sub12`/`sub13`/`sub14`;
+* OneSignal never gets an `external_id`, because that is the AppsFlyer UID, so
+  those installs cannot be addressed by external id in a push campaign.
+
 ### Device signals
 
 Three extra parameters ride along on every offer URL, always sent even when the

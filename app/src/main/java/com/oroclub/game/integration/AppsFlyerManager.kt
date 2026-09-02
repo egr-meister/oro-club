@@ -36,6 +36,21 @@ object AppsFlyerManager {
             isAttributionResolved = true
         }
 
+        // Drawn once per install and then permanent - see IntegrationStorage.
+        if (!IntegrationStorage.hasAttributionRolloutDecision) {
+            IntegrationStorage.attributionEnabled = AttributionRollout.decide()
+        }
+        if (!IntegrationStorage.attributionEnabled) {
+            Log.i(TAG, "AppsFlyer held back for this install by the rollout")
+            // Unblock startup at once: no callback is coming, and the root composable
+            // would otherwise sit on the splash for the whole attribution timeout.
+            // attributionSettled is deliberately left alone - nothing was settled, and
+            // the flag exists to describe an answer AppsFlyer gave.
+            isAttributionResolved = true
+            notifyResolved()
+            return
+        }
+
         val devKey = BuildConfig.APPSFLYER_DEV_KEY
         if (devKey.isBlank()) {
             Log.w(TAG, "APPSFLYER_DEV_KEY is empty - AppsFlyer disabled for this build")
