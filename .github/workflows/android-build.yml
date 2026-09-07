@@ -29,17 +29,17 @@ jobs:
         with:
           packages: ''
 
-      - name: Install SDK Platform 35 and Build Tools 35.0.0
+      - name: Install SDK Platform 36 and Build Tools 36.0.0
         run: |
-          sdkmanager --install "platform-tools" "platforms;android-35" "build-tools;35.0.0"
-          echo "$ANDROID_SDK_ROOT/build-tools/35.0.0" >> "$GITHUB_PATH"
+          sdkmanager --install "platform-tools" "platforms;android-36" "build-tools;36.0.0"
+          echo "$ANDROID_SDK_ROOT/build-tools/36.0.0" >> "$GITHUB_PATH"
 
       # A fixed Gradle version is provisioned here, so a committed
       # gradle-wrapper.jar is not required for CI to work.
-      - name: Set up Gradle 8.9
+      - name: Set up Gradle 8.11.1
         uses: gradle/actions/setup-gradle@v4
         with:
-          gradle-version: '8.9'
+          gradle-version: '8.11.1'
           cache-read-only: ${{ github.ref != 'refs/heads/main' }}
 
       - name: Decode release keystore

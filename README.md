@@ -6,7 +6,7 @@ White/Black integration layer that decides at startup which of the two the
 install sees.
 
 * Application ID: `com.oroclub.game`
-* `minSdk 24` · `compileSdk 35` · `targetSdk 35` · JDK 17 · portrait only
+* `minSdk 24` · `compileSdk 36` · `targetSdk 36` · JDK 17 · portrait only
 * **White** — the game. Entirely local: no account, no ads, no analytics inside
   it, no backend, no cloud. Section 3 describes its storage.
 * **Black** — a remote offer in a WebView, reached only when the routing probe
@@ -230,7 +230,7 @@ Navigation Compose 2.8.5 · AndroidX Lifecycle 2.8.7 (ViewModel +
 `collectAsStateWithLifecycle`) · Coroutines 1.9.0 · Flow ·
 DataStore Preferences 1.1.1 · kotlinx-serialization-json 1.7.3 ·
 Gradle Kotlin DSL with a version catalog (`gradle/libs.versions.toml`) ·
-AGP 8.7.3 · Gradle 8.9 · JDK 17.
+AGP 8.9.1 · Gradle 8.11.1 · JDK 17.
 
 Integration layer: AppsFlyer `af-android-sdk` 6.14.2 · OneSignal 5.1.6 ·
 `HttpURLConnection` · `android.webkit.WebView`.
@@ -328,13 +328,13 @@ to load, playing is a no-op.
 
 1. Android Studio Ladybug (2024.2.1) or newer.
 2. `File ▸ Open…` and pick the project root.
-3. The Gradle wrapper is committed and pinned to **Gradle 8.9**, so `./gradlew`
+3. The Gradle wrapper is committed and pinned to **Gradle 8.11.1**, so `./gradlew`
    works out of the box. If you ever need to regenerate it:
    ```bash
-   gradle wrapper --gradle-version 8.9
+   gradle wrapper --gradle-version 8.11.1
    ```
 4. Make sure the project JDK is **17** (`Settings ▸ Build Tools ▸ Gradle ▸
-   Gradle JDK`) and that **SDK Platform 35** and **Build Tools 35.0.0** are
+   Gradle JDK`) and that **SDK Platform 36** and **Build Tools 36.0.0** are
    installed in the SDK Manager.
 
 ### Debug build
@@ -478,8 +478,8 @@ adb logcat -c && adb logcat | grep -iE "oroclub|AndroidRuntime|FATAL"
 `workflow_dispatch`:
 
 * JDK 17 (Temurin)
-* installs SDK Platform 35 and Build Tools 35.0.0
-* provisions Gradle **8.9** via `gradle/actions/setup-gradle`, so a committed
+* installs SDK Platform 36 and Build Tools 36.0.0
+* provisions Gradle **8.11.1** via `gradle/actions/setup-gradle`, so a committed
   wrapper jar is not required
 * decodes `ANDROID_KEYSTORE_BASE64` into a temporary file
 * runs the unit tests, then `assembleRelease` and `bundleRelease`
@@ -543,7 +543,7 @@ defaults. Uninstalling the app removes the DataStore file entirely.
 * Sound effects are synthesized placeholder tones.
 * No animations beyond a fade for modals and a short squash on card flips —
   intentional, to keep the release stable and cheap on old devices.
-* CI provisions Gradle 8.9 through `setup-gradle` rather than executing the
+* CI provisions Gradle 8.11.1 through `setup-gradle` rather than executing the
   committed wrapper, so the two paths are pinned to the same version in two
   places — bump both together.
 * There is no instrumentation test suite; verification of the UI is the manual
@@ -557,7 +557,33 @@ defaults. Uninstalling the app removes the DataStore file entirely.
 
 ---
 
-## 13. White/Black integration
+## 13. Targeting Android 16 (API 36)
+
+Google Play requires `targetSdk 36` for updates. The bump pulls a version chain
+with it: `compileSdk 36` needs **AGP 8.9.1 or newer**, and AGP 8.9 needs
+**Gradle 8.11.1 or newer**. Both the committed wrapper and the CI
+`setup-gradle` step are pinned to 8.11.1 — bump them together.
+
+Behaviour changes that actually touch this app:
+
+* **Edge-to-edge is mandatory** and `windowOptOutEdgeToEdgeEnforcement` no
+  longer works. Already satisfied: `enableEdgeToEdge()` plus `safeDrawing`
+  padding on every screen.
+* **Predictive back is on by default**, and `onBackPressed()` is no longer
+  called. Already satisfied: back is handled only through Compose `BackHandler`
+  and Navigation Compose, both of which sit on `OnBackPressedDispatcher`. There
+  is no `onBackPressed()` override anywhere in the project.
+* **`android:screenOrientation` is ignored on sw600dp and larger.** A
+  portrait-only app starts free-rotating on tablets and foldables. The manifest
+  sets `PROPERTY_COMPAT_ALLOW_RESTRICTED_RESIZABILITY` to keep the current
+  behaviour — a **temporary** escape hatch that stops working at `targetSdk 37`.
+  Before the next bump the layouts have to work in landscape on their own.
+* **WebView local-network access** now needs `NEARBY_WIFI_DEVICES`. Not
+  applicable: the offer is a public domain, so no permission was added.
+
+---
+
+## 14. White/Black integration
 
 At startup the app asks a server whether this particular install should see the
 game or the offer:
