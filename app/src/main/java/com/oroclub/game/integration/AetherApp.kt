@@ -8,9 +8,9 @@ import com.oroclub.game.OroClubApp
  * It extends [OroClubApp] rather than replacing it, so the game's own startup - the
  * DataStore repository and the SFX pool - runs first and unchanged.
  *
- * Order matters: storage before the manager (the manager reads `attributionSettled`),
- * the user agent before anything can probe, and AppsFlyer before OneSignal (the push
- * external id is the AppsFlyer UID).
+ * Order matters: storage first (everything else reads from it); the accelerometer and the
+ * push token are started here, not where the URL is built, because each needs a window and
+ * building the URL would otherwise block for it.
  */
 class AetherApp : OroClubApp() {
 
@@ -18,11 +18,10 @@ class AetherApp : OroClubApp() {
         super.onCreate()
         IntegrationStorage.init(this)
         DeviceSignals.init(this)
-        // Sampling takes a full second, so it has to begin at launch - starting it where
-        // the URL is built would mean blocking there for the whole window.
+        // Sampling takes a full second, so it has to begin at launch.
         AccelerometerProbe.start(this)
-        UserAgentProvider.init(this)
-        AppsFlyerManager.init(this)
-        OneSignalManager.init(this)
+        AdjustManager.init(this)
+        // The token must exist before the single click, so request it at launch.
+        PushManager.init(this)
     }
 }

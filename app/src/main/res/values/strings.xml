@@ -1,4 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Oro Club</string>
+    <string name="app_name" translatable="false">Oro Club</string>
+
+    <!-- Integration layer chrome -->
+    <string name="loading">LOADING</string>
+    <string name="offer_error_title">Something went wrong</string>
+    <string name="offer_error_body">The page could not be loaded. Check your connection and try again.</string>
+    <string name="retry">RETRY</string>
 </resources>
