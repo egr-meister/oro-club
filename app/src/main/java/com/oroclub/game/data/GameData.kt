@@ -8,7 +8,14 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 data class Settings(
-    val soundEnabled: Boolean = true
+    val soundEnabled: Boolean = true,
+    /**
+     * "system" | "light" | "dark". Stored as a string so an unknown future value decodes
+     * cleanly to the default. Defaults to dark: the artwork is a night sky, so a light
+     * first launch would look broken. The language is NOT stored here - AppCompatDelegate
+     * is its own source of truth.
+     */
+    val themeMode: String = "dark"
 )
 
 /**

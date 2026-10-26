@@ -54,6 +54,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
@@ -67,6 +68,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import com.oroclub.game.R
 import com.oroclub.game.audio.SoundManager
 import com.oroclub.game.ui.Assets
 import com.oroclub.game.ui.theme.DeepRoyal
@@ -157,7 +159,7 @@ fun OroScreen(
                     if (onBack != null) {
                         IconPlateButton(
                             iconRes = Assets.iconBack,
-                            contentDescription = "Back",
+                            contentDescription = stringResource(R.string.a11y_back),
                             onClick = onBack
                         )
                     } else {
@@ -174,7 +176,7 @@ fun OroScreen(
                     if (onPause != null) {
                         IconPlateButton(
                             iconRes = Assets.iconPause,
-                            contentDescription = "Pause",
+                            contentDescription = stringResource(R.string.a11y_pause),
                             onClick = onPause
                         )
                     } else {
@@ -550,14 +552,14 @@ fun FallbackScreen(
     message: String,
     onBack: () -> Unit
 ) {
-    OroScreen(title = "Oro Club", onBack = onBack) {
+    OroScreen(title = stringResource(R.string.app_name), onBack = onBack) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             OroPanel(modifier = Modifier.fillMaxWidth(0.92f)) {
-                GoldTitle(text = "Nothing to show", style = MaterialTheme.typography.headlineSmall)
+                GoldTitle(text = stringResource(R.string.fallback_nothing), style = MaterialTheme.typography.headlineSmall)
                 GoldDivider()
                 BodyText(text = message)
                 PlateButton(
-                    text = "BACK",
+                    text = stringResource(R.string.btn_back),
                     onClick = onBack,
                     modifier = Modifier.fillMaxWidth(0.72f)
                 )

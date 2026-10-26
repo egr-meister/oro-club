@@ -3,6 +3,7 @@ package com.oroclub.game.ui.nav
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
@@ -11,6 +12,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.oroclub.game.R
 import com.oroclub.game.data.GameRepository
 import com.oroclub.game.domain.GameLogic
 import com.oroclub.game.domain.QuizContent
@@ -99,7 +101,7 @@ fun OroNavGraph(
             val category = QuizContent.categoryById(categoryId)
             if (category == null) {
                 FallbackScreen(
-                    message = "That quiz deck is no longer available.",
+                    message = stringResource(R.string.fallback_quiz_deck),
                     onBack = { navController.popBackStack() }
                 )
             } else {
@@ -151,7 +153,7 @@ fun OroNavGraph(
                 .coerceIn(0, QuizContent.QUESTIONS_PER_CATEGORY)
             if (category == null) {
                 FallbackScreen(
-                    message = "These results belong to a deck that is no longer available.",
+                    message = stringResource(R.string.fallback_quiz_results),
                     onBack = { backToMenu() }
                 )
             } else {
@@ -194,7 +196,7 @@ fun OroNavGraph(
             val level = entry.arguments?.getInt(Routes.ARG_LEVEL) ?: 0
             if (!GameLogic.isValidLevel(level)) {
                 FallbackScreen(
-                    message = "That level does not exist in this build.",
+                    message = stringResource(R.string.fallback_level),
                     onBack = { navController.popBackStack() }
                 )
             } else {
@@ -248,7 +250,7 @@ fun OroNavGraph(
             val config = GameLogic.levelConfig(level)
             if (config == null) {
                 FallbackScreen(
-                    message = "These results belong to a level that no longer exists.",
+                    message = stringResource(R.string.fallback_level_results),
                     onBack = { backToMenu() }
                 )
             } else {
@@ -297,6 +299,8 @@ fun OroNavGraph(
             SettingsScreen(
                 soundEnabled = progress.soundEnabled,
                 onSoundChange = progressViewModel::setSoundEnabled,
+                themeMode = progress.themeMode,
+                onThemeChange = progressViewModel::setThemeMode,
                 onReset = progressViewModel::resetProgress,
                 onBack = { navController.popBackStack() }
             )

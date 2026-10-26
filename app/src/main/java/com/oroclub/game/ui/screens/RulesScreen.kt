@@ -16,8 +16,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.oroclub.game.R
 import com.oroclub.game.ui.components.GoldTitle
 import com.oroclub.game.ui.components.OroScreen
 import com.oroclub.game.ui.theme.DeepRoyal
@@ -28,41 +30,17 @@ import com.oroclub.game.ui.theme.TextPrimary
 
 private data class RuleBlock(val title: String, val body: String)
 
-private val rules = listOf(
-    RuleBlock(
-        "Quiz",
-        "Pick one of three themed decks. Each deck holds ten questions with one " +
-            "correct answer. Tap an answer and it is revealed immediately — the correct " +
-            "option is marked with a check, a wrong pick with a cross — then the next " +
-            "question arrives on its own. Your best score per deck is kept."
-    ),
-    RuleBlock(
-        "Matching Pairs",
-        "Nine levels, each with more cards and a longer clock. Flip two cards: a " +
-            "matching pair stays face up, a mismatch turns back over. Clear every pair " +
-            "before the timer runs out to win the level. Finish a level to unlock the next one."
-    ),
-    RuleBlock(
-        "Pause",
-        "Tap the pause token at any time. The clock stops while the panel is open, and " +
-            "you can continue, restart the round, or step back to the menu."
-    ),
-    RuleBlock(
-        "Your progress",
-        "Best quiz scores, cleared levels and the sound switch are saved on this device " +
-            "and nowhere else. Reset them any time from Settings."
-    ),
-    RuleBlock(
-        "Fair play",
-        "Oro Club is a single-player game for entertainment. There is no wagering, no " +
-            "real-money play, no prizes and no online component of any kind."
-    )
-)
-
 /** Static rules text, reachable from the menu and from the level select. */
 @Composable
 fun RulesScreen(onBack: () -> Unit) {
-    OroScreen(title = "Game Rules", onBack = onBack) {
+    val rules = listOf(
+        RuleBlock(stringResource(R.string.rules_quiz_title), stringResource(R.string.rules_quiz_body)),
+        RuleBlock(stringResource(R.string.rules_pairs_title), stringResource(R.string.rules_pairs_body)),
+        RuleBlock(stringResource(R.string.rules_pause_title), stringResource(R.string.rules_pause_body)),
+        RuleBlock(stringResource(R.string.rules_progress_title), stringResource(R.string.rules_progress_body)),
+        RuleBlock(stringResource(R.string.rules_fair_title), stringResource(R.string.rules_fair_body))
+    )
+    OroScreen(title = stringResource(R.string.rules_title), onBack = onBack) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -94,7 +72,7 @@ fun RulesScreen(onBack: () -> Unit) {
                 }
             }
             Text(
-                text = "Oro Club — Golden Joker Club",
+                text = stringResource(R.string.rules_footer),
                 color = TextPrimary,
                 style = MaterialTheme.typography.labelMedium,
                 textAlign = TextAlign.Center,

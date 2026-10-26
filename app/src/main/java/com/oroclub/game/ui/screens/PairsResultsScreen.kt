@@ -10,7 +10,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.oroclub.game.R
 import com.oroclub.game.ui.Assets
 import com.oroclub.game.ui.components.BodyText
 import com.oroclub.game.ui.components.CenteredScrollContent
@@ -48,33 +50,34 @@ fun PairsResultsScreen(
                     modifier = Modifier.height(112.dp).aspectRatio(Assets.MASCOT_ASPECT)
                 )
                 GoldTitle(
-                    text = if (won) "Well Done" else "Out of Time",
+                    text = if (won) stringResource(R.string.pairs_well_done) else stringResource(R.string.pairs_out_of_time),
                     style = MaterialTheme.typography.headlineMedium
                 )
                 GoldDivider()
                 StrongText(
-                    text = if (won) "Level $level cleared" else "Level $level not cleared",
+                    text = if (won) stringResource(R.string.pairs_level_cleared, level)
+                    else stringResource(R.string.pairs_level_not_cleared, level),
                     color = if (won) CorrectGreen else WrongRed,
                     style = MaterialTheme.typography.titleLarge
                 )
                 StrongText(
-                    text = "Pairs matched: $matched/$total",
+                    text = stringResource(R.string.pairs_matched, matched, total),
                     style = MaterialTheme.typography.headlineSmall
                 )
                 BodyText(
                     text = when {
-                        won && hasNextLevel -> "The next table is open."
-                        won -> "Every table in the club is cleared."
-                        else -> "Try the same table again — the deck reshuffles."
+                        won && hasNextLevel -> stringResource(R.string.pairs_next_open)
+                        won -> stringResource(R.string.pairs_all_cleared)
+                        else -> stringResource(R.string.pairs_try_again)
                     }
                 )
                 PlateButton(
-                    text = if (won && hasNextLevel) "NEXT LEVEL" else "CONTINUE",
+                    text = if (won && hasNextLevel) stringResource(R.string.btn_next_level) else stringResource(R.string.btn_continue),
                     onClick = onContinue,
                     modifier = Modifier.fillMaxWidth(0.86f)
                 )
-                PlateButton("RESTART", onRestart, Modifier.fillMaxWidth(0.86f))
-                PlateButton("MENU", onMenu, Modifier.fillMaxWidth(0.86f))
+                PlateButton(stringResource(R.string.btn_restart), onRestart, Modifier.fillMaxWidth(0.86f))
+                PlateButton(stringResource(R.string.btn_menu), onMenu, Modifier.fillMaxWidth(0.86f))
             }
         }
     }

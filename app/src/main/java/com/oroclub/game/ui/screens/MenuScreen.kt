@@ -15,7 +15,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.oroclub.game.R
 import com.oroclub.game.ui.Assets
 import com.oroclub.game.ui.components.BodyText
 import com.oroclub.game.ui.components.MenuPlateButton
@@ -35,7 +37,7 @@ fun MenuScreen(
     onRules: () -> Unit,
     onBack: () -> Unit
 ) {
-    OroScreen(title = "The Club", onBack = onBack) {
+    OroScreen(title = stringResource(R.string.menu_title), onBack = onBack) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -52,13 +54,13 @@ fun MenuScreen(
                     .height(132.dp)
                     .aspectRatio(Assets.MASCOT_ASPECT)
             )
-            BodyText(text = "Pick your table")
+            BodyText(text = stringResource(R.string.menu_pick))
 
-            MenuPlateButton("QUIZ", onQuiz, Modifier.fillMaxWidth(0.7f))
-            MenuPlateButton("MATCHING PAIRS", onPairs, Modifier.fillMaxWidth(0.7f))
-            MenuPlateButton("RESULTS", onResults, Modifier.fillMaxWidth(0.7f))
-            MenuPlateButton("GAME RULES", onRules, Modifier.fillMaxWidth(0.7f))
-            MenuPlateButton("SETTINGS", onSettings, Modifier.fillMaxWidth(0.7f))
+            MenuPlateButton(stringResource(R.string.menu_quiz), onQuiz, Modifier.fillMaxWidth(0.7f))
+            MenuPlateButton(stringResource(R.string.menu_pairs), onPairs, Modifier.fillMaxWidth(0.7f))
+            MenuPlateButton(stringResource(R.string.menu_results), onResults, Modifier.fillMaxWidth(0.7f))
+            MenuPlateButton(stringResource(R.string.menu_rules), onRules, Modifier.fillMaxWidth(0.7f))
+            MenuPlateButton(stringResource(R.string.menu_settings), onSettings, Modifier.fillMaxWidth(0.7f))
         }
     }
 }

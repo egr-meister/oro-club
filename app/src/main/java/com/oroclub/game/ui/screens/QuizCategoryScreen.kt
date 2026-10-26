@@ -28,11 +28,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.oroclub.game.R
 import com.oroclub.game.audio.SoundManager
 import com.oroclub.game.ui.Assets
 import com.oroclub.game.ui.components.BodyText
@@ -55,7 +57,7 @@ fun QuizCategoryScreen(
     onCategory: (String) -> Unit,
     onBack: () -> Unit
 ) {
-    OroScreen(title = "Quiz", onBack = onBack) {
+    OroScreen(title = stringResource(R.string.quiz_title), onBack = onBack) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -64,11 +66,11 @@ fun QuizCategoryScreen(
             verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
             BodyText(
-                text = "Ten questions per deck. Answer, and the table answers back.",
+                text = stringResource(R.string.quiz_intro),
                 modifier = Modifier.fillMaxWidth()
             )
             if (state.quizProgress.isEmpty()) {
-                BodyText(text = "No quiz decks are available in this build.")
+                BodyText(text = stringResource(R.string.quiz_none))
             } else {
                 state.quizProgress.forEach { category ->
                     CategoryRow(category = category, onClick = { onCategory(category.id) })
@@ -122,7 +124,7 @@ private fun CategoryRow(
                 style = MaterialTheme.typography.titleLarge
             )
             Text(
-                text = "Best ${category.best}/${category.total}",
+                text = stringResource(R.string.quiz_best, category.best, category.total),
                 color = TextMuted,
                 style = MaterialTheme.typography.bodyMedium
             )
@@ -136,7 +138,7 @@ private fun CategoryRow(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "PLAY",
+                text = stringResource(R.string.quiz_play),
                 color = DeepRoyal,
                 textAlign = TextAlign.Center,
                 style = MaterialTheme.typography.labelMedium

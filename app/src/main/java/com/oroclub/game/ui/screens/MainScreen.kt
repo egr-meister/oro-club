@@ -21,9 +21,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.oroclub.game.R
 import com.oroclub.game.ui.Assets
 import com.oroclub.game.ui.components.MenuPlateButton
 import com.oroclub.game.ui.components.OroBackground
@@ -85,7 +87,7 @@ fun MainScreen(
                         .aspectRatio(Assets.LOGO_ASPECT)
                 )
                 Text(
-                    text = "TAKE A SEAT AT THE GOLDEN TABLE",
+                    text = stringResource(R.string.main_tagline),
                     color = TextMuted,
                     fontSize = 12.sp,
                     letterSpacing = 2.4.sp,
@@ -120,7 +122,7 @@ fun MainScreen(
                 contentAlignment = Alignment.Center
             ) {
                 MenuPlateButton(
-                    text = "ENTER THE CLUB",
+                    text = stringResource(R.string.main_enter),
                     onClick = onStart,
                     modifier = Modifier.fillMaxWidth(0.7f)
                 )
