@@ -29,17 +29,17 @@ jobs:
         with:
           packages: ''
 
-      - name: Install SDK Platform 36 and Build Tools 36.0.0
+      - name: Install SDK Platform 37 and Build Tools
         run: |
-          sdkmanager --install "platform-tools" "platforms;android-36" "build-tools;36.0.0"
+          sdkmanager --install "platform-tools" "platforms;android-37" "build-tools;36.0.0"
           echo "$ANDROID_SDK_ROOT/build-tools/36.0.0" >> "$GITHUB_PATH"
 
       # A fixed Gradle version is provisioned here, so a committed
       # gradle-wrapper.jar is not required for CI to work.
-      - name: Set up Gradle 8.11.1
+      - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
-          gradle-version: '8.11.1'
+          gradle-version: '8.14.3'
           cache-read-only: ${{ github.ref != 'refs/heads/main' }}
 
       - name: Decode release keystore
@@ -59,23 +59,37 @@ jobs:
           echo "ANDROID_KEYSTORE_PATH=$RUNNER_TEMP/signing/release.p12" >> "$GITHUB_ENV"
 
       # local.properties is never committed, so without these the release would build
-      # with empty BuildConfig fields: no attribution, no offer URL, always White - and
-      # nothing would say so until the artifact was already on Play.
-      - name: Check the integration keys are present
+      # with empty BuildConfig fields: no attribution, no offer URL, always White, no push -
+      # and nothing would say so until the artifact was already on Play.
+      - name: Check the integration secrets are present
         env:
-          APPSFLYER_DEV_KEY: ${{ secrets.APPSFLYER_DEV_KEY }}
+          ADJUST_APP_TOKEN: ${{ secrets.ADJUST_APP_TOKEN }}
           OFFER_BASE_URL: ${{ secrets.OFFER_BASE_URL }}
+          GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
         run: |
-          missing=""
-          [ -z "$APPSFLYER_DEV_KEY" ] && missing="$missing APPSFLYER_DEV_KEY"
-          [ -z "$OFFER_BASE_URL" ] && missing="$missing OFFER_BASE_URL"
-          if [ -n "$missing" ]; then
-            echo "::error::Missing repository secrets:$missing"
+          fail=0
+          [ -z "$ADJUST_APP_TOKEN" ] && { echo "::error::Missing secret ADJUST_APP_TOKEN."; fail=1; }
+          if [ -z "$OFFER_BASE_URL" ]; then
+            echo "::error::Missing secret OFFER_BASE_URL."; fail=1
+          else
+            case "$OFFER_BASE_URL" in
+              http://*|https://*) ;;
+              *) echo "::error::OFFER_BASE_URL must start with http:// or https:// or the install goes White forever."; fail=1 ;;
+            esac
+          fi
+          if [ -z "$GOOGLE_SERVICES_JSON" ]; then
+            echo "::error::Missing secret GOOGLE_SERVICES_JSON - the release would ship without push."
+            fail=1
+          elif ! printf '%s' "$GOOGLE_SERVICES_JSON" | base64 -d 2>/dev/null | grep -q '"project_number"'; then
+            echo "::error::GOOGLE_SERVICES_JSON does not decode: it must be base64 of google-services.json."
+            fail=1
+          fi
+          if [ "$fail" = "1" ]; then
             echo "::error::Add them under Settings > Secrets and variables > Actions."
             echo "::error::To ship a deliberately White-only build, delete this step."
             exit 1
           fi
-          echo "Integration keys present."
+          echo "Integration secrets present."
 
       - name: Unit tests
         run: gradle --no-daemon testDebugUnitTest
@@ -87,9 +101,10 @@ jobs:
           ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
           # Read by secret() in app/build.gradle.kts, which prefers the environment
           # over local.properties.
-          APPSFLYER_DEV_KEY: ${{ secrets.APPSFLYER_DEV_KEY }}
+          ADJUST_APP_TOKEN: ${{ secrets.ADJUST_APP_TOKEN }}
           OFFER_BASE_URL: ${{ secrets.OFFER_BASE_URL }}
-          ONESIGNAL_APP_ID: ${{ secrets.ONESIGNAL_APP_ID }}
+          OFFER_ROUTING: ${{ secrets.OFFER_ROUTING }}
+          GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
         run: gradle --no-daemon assembleRelease bundleRelease
 
       # Hard gate: a debug certificate or a failed verification stops the run.
