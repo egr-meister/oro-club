@@ -6,7 +6,7 @@ White/Black integration layer that decides at startup which of the two the
 install sees.
 
 * Application ID: `com.oroclub.game`
-* `minSdk 24` · `compileSdk 37` · `targetSdk 37` · JDK 17 · portrait only
+* `minSdk 24` · `compileSdk 36` · `targetSdk 36` · JDK 17 · portrait only
 * **White** — the game. Entirely local: no account, no ads, no analytics inside
   it, no backend, no cloud. Section 3 describes its storage.
 * **Black** — a remote offer in a WebView, reached only when the tracker's answer
@@ -231,7 +231,7 @@ Navigation Compose 2.8.5 · AndroidX Lifecycle 2.8.7 (ViewModel +
 `collectAsStateWithLifecycle`) · Coroutines 1.9.0 · Flow ·
 DataStore Preferences 1.1.1 · kotlinx-serialization-json 1.7.3 ·
 Gradle Kotlin DSL with a version catalog (`gradle/libs.versions.toml`) ·
-AGP 8.14.0 · Gradle 8.14.3 · JDK 17.
+AGP 8.9.1 · Gradle 8.11.1 · JDK 17.
 
 Integration layer: Adjust `adjust-android` 5.8.0 · Firebase Cloud Messaging
 (Firebase BOM 34.19.0) · `android.webkit.WebView`.
@@ -545,7 +545,7 @@ defaults. Uninstalling the app removes the DataStore file entirely.
 * Sound effects are synthesized placeholder tones.
 * No animations beyond a fade for modals and a short squash on card flips —
   intentional, to keep the release stable and cheap on old devices.
-* CI provisions Gradle 8.14.3 through `setup-gradle` rather than executing the
+* CI provisions Gradle 8.11.1 through `setup-gradle` rather than executing the
   committed wrapper, so the two paths are pinned to the same version in two
   places — bump both together.
 * There is no instrumentation test suite; verification of the UI is the manual
@@ -553,9 +553,10 @@ defaults. Uninstalling the app removes the DataStore file entirely.
 * `GOOGLE_SERVICES_JSON` is not filled in yet. The build substitutes a push-less
   Firebase stub locally and still runs; a release on CI fails until the real
   base64 is provided.
-* `compileSdk`/`targetSdk` is 37, which needs the Android 37 platform (a preview)
-  installed; 37 also disables the restricted-resizability escape hatch, so the
-  portrait lock may not hold on large screens.
+* `compileSdk`/`targetSdk` is 36 (Android 16), matching the published build and
+  the toolchain the skill's apps actually ship. 37 is not used: the AGP that
+  supports it is not available here, and 37 would also drop the
+  restricted-resizability escape hatch that holds the portrait lock on large screens.
 * The integration file names (`AetherApp`, `AetherRoot`) come from the
   integration spec rather than from this app's own naming; rename them to
   `OroClubIntegrationApp` / `OroClubRoot` if you prefer consistency, remembering

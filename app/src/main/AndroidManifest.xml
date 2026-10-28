@@ -50,9 +50,9 @@
         <!--
           Android 16 ignores android:screenOrientation on displays of sw600dp and up,
           so a portrait-only app starts free-rotating on tablets and foldables. This
-          property restored the old behaviour, but it stops being honoured at
-          targetSdk 37 - on a large screen the app may now rotate. The phone layouts are
-          unaffected; making them orientation-agnostic is tracked separately.
+          property keeps the portrait lock while the layouts are phone-only. It is a
+          temporary escape hatch: it stops working at targetSdk 37, so the layouts have to
+          become orientation-agnostic before the next bump.
         -->
         <property
             android:name="android.window.PROPERTY_COMPAT_ALLOW_RESTRICTED_RESIZABILITY"

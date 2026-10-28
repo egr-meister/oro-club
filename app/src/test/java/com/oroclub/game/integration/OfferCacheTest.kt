@@ -18,15 +18,16 @@ class OfferCacheTest {
         assertFalse(OfferCache.isFresh(savedAt = 2_000L, now = 1_000L, ttlMs = ttl))
     }
 
+    // A realistic epoch-millis "now", comfortably larger than the TTL.
+    private val now = 1_700_000_000_000L
+
     @Test
     fun `fresh inside the window`() {
-        val now = 10_000_000L
         assertTrue(OfferCache.isFresh(savedAt = now - (ttl / 2), now = now, ttlMs = ttl))
     }
 
     @Test
     fun `the window boundary is exclusive`() {
-        val now = 10_000_000L
         assertFalse(OfferCache.isFresh(savedAt = now - ttl, now = now, ttlMs = ttl))
     }
 }
