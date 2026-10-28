@@ -75,6 +75,10 @@ class GameRepository(appContext: Context) {
         update { current -> current.copy(settings = current.settings.copy(soundEnabled = enabled)) }
     }
 
+    suspend fun setThemeMode(mode: String) {
+        update { current -> current.copy(settings = current.settings.copy(themeMode = mode)) }
+    }
+
     /** Wipes all progress and restores default settings. */
     suspend fun resetAll() {
         try {

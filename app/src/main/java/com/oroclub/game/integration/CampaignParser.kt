@@ -1,7 +1,7 @@
 package com.oroclub.game.integration
 
 /**
- * Splits an AppsFlyer `campaign` value into positional sub-parameters.
+ * Splits a `campaign` value (as Adjust reports it) into positional sub-parameters.
  *
  * The network packs several fields into one underscore-joined string; the tracker on the
  * receiving end expects them back as sub1..subN alongside the untouched original.

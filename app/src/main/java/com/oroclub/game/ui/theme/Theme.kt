@@ -1,10 +1,24 @@
 package com.oroclub.game.ui.theme
 
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 
-private val OroColorScheme = darkColorScheme(
+/** Theme choice offered on the Settings screen. Persisted as [storageKey]. */
+enum class ThemeMode(val storageKey: String) {
+    SYSTEM("system"),
+    LIGHT("light"),
+    DARK("dark");
+
+    companion object {
+        fun fromStorage(key: String?): ThemeMode =
+            entries.firstOrNull { it.storageKey == key } ?: DARK
+    }
+}
+
+private val OroDarkScheme = darkColorScheme(
     primary = Gold,
     onPrimary = NearBlack,
     primaryContainer = GoldDark,
@@ -23,14 +37,40 @@ private val OroColorScheme = darkColorScheme(
 )
 
 /**
- * Oro Club is a single dark, high-contrast theme by design — the artwork is a
- * night-sky background and a light theme would break every asset. Dynamic
- * colour is intentionally not used.
+ * A light scheme so the theme toggle is real. Oro Club's artwork is a fixed night-sky
+ * background, so light mode mainly re-tints Material surfaces rather than repainting the
+ * whole screen; the background image stays dark by design.
  */
+private val OroLightScheme = lightColorScheme(
+    primary = GoldDark,
+    onPrimary = TextPrimary,
+    primaryContainer = GoldSoft,
+    onPrimaryContainer = NearBlack,
+    secondary = Gem,
+    onSecondary = NearBlack,
+    background = LightBackground,
+    onBackground = LightOnSurface,
+    surface = LightSurface,
+    onSurface = LightOnSurface,
+    surfaceVariant = LightSurfaceVariant,
+    onSurfaceVariant = LightOnSurfaceVariant,
+    error = WrongRed,
+    onError = TextPrimary,
+    outline = GoldDark
+)
+
 @Composable
-fun OroClubTheme(content: @Composable () -> Unit) {
+fun OroClubTheme(
+    themeMode: ThemeMode = ThemeMode.DARK,
+    content: @Composable () -> Unit
+) {
+    val dark = when (themeMode) {
+        ThemeMode.SYSTEM -> isSystemInDarkTheme()
+        ThemeMode.LIGHT -> false
+        ThemeMode.DARK -> true
+    }
     MaterialTheme(
-        colorScheme = OroColorScheme,
+        colorScheme = if (dark) OroDarkScheme else OroLightScheme,
         typography = OroTypography,
         content = content
     )

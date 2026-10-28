@@ -16,7 +16,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.oroclub.game.R
 import com.oroclub.game.ui.theme.ScrimColor
 
 /**
@@ -77,11 +79,11 @@ fun PauseOverlay(
     onMenu: () -> Unit
 ) {
     ModalPanelOverlay(visible = visible) {
-        GoldTitle(text = "Paused", style = MaterialTheme.typography.headlineMedium)
+        GoldTitle(text = stringResource(R.string.pause_title), style = MaterialTheme.typography.headlineMedium)
         GoldDivider()
-        BodyText(text = "The table waits. Take your time.")
-        PlateButton(text = "CONTINUE", onClick = onContinue, modifier = Modifier.fillMaxWidth(0.86f))
-        PlateButton(text = "RESTART", onClick = onRestart, modifier = Modifier.fillMaxWidth(0.86f))
-        PlateButton(text = "MENU", onClick = onMenu, modifier = Modifier.fillMaxWidth(0.86f))
+        BodyText(text = stringResource(R.string.pause_body))
+        PlateButton(text = stringResource(R.string.btn_continue), onClick = onContinue, modifier = Modifier.fillMaxWidth(0.86f))
+        PlateButton(text = stringResource(R.string.btn_restart), onClick = onRestart, modifier = Modifier.fillMaxWidth(0.86f))
+        PlateButton(text = stringResource(R.string.btn_menu), onClick = onMenu, modifier = Modifier.fillMaxWidth(0.86f))
     }
 }

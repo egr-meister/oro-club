@@ -33,3 +33,11 @@ val WrongRed = Color(0xFFB73A3A)
 val TextPrimary = Color(0xFFFFFFFF)
 val TextMuted = Color(0xFFC9D3E8)
 val ScrimColor = Color(0xCC01060F)
+
+// Light scheme surfaces, used only when the theme toggle is set to Light. The night-sky
+// background artwork stays dark by design; these re-tint Material surfaces.
+val LightBackground = Color(0xFFFCF7EA)
+val LightSurface = Color(0xFFFFFFFF)
+val LightSurfaceVariant = Color(0xFFF2E8C9)
+val LightOnSurface = Color(0xFF1A1A12)
+val LightOnSurfaceVariant = Color(0xFF5A513A)

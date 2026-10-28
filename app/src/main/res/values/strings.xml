@@ -1,4 +1,134 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  English is the DEFAULT (values/) locale: the fallback for every system language not
+  shipped as its own values-xx. Russian lives in values-ru. Keep every name= in sync
+  across all seven files (scripts/check_locales.sh) or the app crashes on the locale
+  that is missing a key.
+
+  Quiz questions, category titles and match-icon names are game DATA kept in Kotlin and
+  deliberately not localised here.
+-->
 <resources>
-    <string name="app_name">Oro Club</string>
+    <string name="app_name" translatable="false">Oro Club</string>
+
+    <!-- Integration layer chrome -->
+    <string name="loading">LOADING</string>
+    <string name="offer_error_title">Something went wrong</string>
+    <string name="offer_error_body">The page could not be loaded. Check your connection and try again.</string>
+    <string name="retry">RETRY</string>
+
+    <!-- Shared buttons -->
+    <string name="btn_continue">CONTINUE</string>
+    <string name="btn_restart">RESTART</string>
+    <string name="btn_menu">MENU</string>
+    <string name="btn_back">BACK</string>
+    <string name="btn_next_level">NEXT LEVEL</string>
+    <string name="a11y_back">Back</string>
+    <string name="a11y_pause">Pause</string>
+
+    <!-- Main -->
+    <string name="main_tagline">TAKE A SEAT AT THE GOLDEN TABLE</string>
+    <string name="main_enter">ENTER THE CLUB</string>
+
+    <!-- Menu -->
+    <string name="menu_title">The Club</string>
+    <string name="menu_pick">Pick your table</string>
+    <string name="menu_quiz">QUIZ</string>
+    <string name="menu_pairs">MATCHING PAIRS</string>
+    <string name="menu_results">RESULTS</string>
+    <string name="menu_rules">GAME RULES</string>
+    <string name="menu_settings">SETTINGS</string>
+
+    <!-- Levels -->
+    <string name="levels_title">Matching Pairs</string>
+    <string name="levels_cleared_count">Cleared %1$d of %2$d levels</string>
+    <string name="level_cleared">CLEARED</string>
+    <string name="level_locked">LOCKED</string>
+    <string name="level_pairs_count">%1$d pairs</string>
+
+    <!-- Quiz categories -->
+    <string name="quiz_title">Quiz</string>
+    <string name="quiz_intro">Ten questions per deck. Answer, and the table answers back.</string>
+    <string name="quiz_none">No quiz decks are available in this build.</string>
+    <string name="quiz_best">Best %1$d/%2$d</string>
+    <string name="quiz_play">PLAY</string>
+
+    <!-- Quiz round -->
+    <string name="quiz_score_so_far">Score so far: %1$d</string>
+
+    <!-- Quiz results -->
+    <string name="quiz_result_round_over">Round over</string>
+    <string name="quiz_result_flawless">A flawless hand</string>
+    <string name="quiz_result_approves">The joker approves</string>
+    <string name="quiz_result_fair">A fair run</string>
+    <string name="quiz_result_unkind">The deck was unkind</string>
+    <string name="quiz_result_score">Score: %1$d/%2$d</string>
+
+    <!-- Pairs round -->
+    <string name="pairs_level_title">Level %1$d</string>
+    <string name="pairs_counter">Pairs %1$d/%2$d</string>
+
+    <!-- Pairs results -->
+    <string name="pairs_well_done">Well Done</string>
+    <string name="pairs_out_of_time">Out of Time</string>
+    <string name="pairs_level_cleared">Level %1$d cleared</string>
+    <string name="pairs_level_not_cleared">Level %1$d not cleared</string>
+    <string name="pairs_matched">Pairs matched: %1$d/%2$d</string>
+    <string name="pairs_next_open">The next table is open.</string>
+    <string name="pairs_all_cleared">Every table in the club is cleared.</string>
+    <string name="pairs_try_again">Try the same table again — the deck reshuffles.</string>
+
+    <!-- Results summary -->
+    <string name="results_title">Results</string>
+    <string name="results_no_decks">No quiz decks available.</string>
+    <string name="results_levels_cleared">Levels cleared</string>
+    <string name="results_progress_note">Progress is stored on this device only. It is never uploaded anywhere.</string>
+
+    <!-- Rules -->
+    <string name="rules_title">Game Rules</string>
+    <string name="rules_quiz_title">Quiz</string>
+    <string name="rules_quiz_body">Pick one of three themed decks. Each deck holds ten questions with one correct answer. Tap an answer and it is revealed immediately — the correct option is marked with a check, a wrong pick with a cross — then the next question arrives on its own. Your best score per deck is kept.</string>
+    <string name="rules_pairs_title">Matching Pairs</string>
+    <string name="rules_pairs_body">Nine levels, each with more cards and a longer clock. Flip two cards: a matching pair stays face up, a mismatch turns back over. Clear every pair before the timer runs out to win the level. Finish a level to unlock the next one.</string>
+    <string name="rules_pause_title">Pause</string>
+    <string name="rules_pause_body">Tap the pause token at any time. The clock stops while the panel is open, and you can continue, restart the round, or step back to the menu.</string>
+    <string name="rules_progress_title">Your progress</string>
+    <string name="rules_progress_body">Best quiz scores, cleared levels and the sound switch are saved on this device and nowhere else. Reset them any time from Settings.</string>
+    <string name="rules_fair_title">Fair play</string>
+    <string name="rules_fair_body">Oro Club is a single-player game for entertainment. There is no wagering, no real-money play, no prizes and no online component of any kind.</string>
+    <string name="rules_footer">Oro Club — Golden Joker Club</string>
+
+    <!-- Pause overlay -->
+    <string name="pause_title">Paused</string>
+    <string name="pause_body">The table waits. Take your time.</string>
+
+    <!-- Fallback -->
+    <string name="fallback_nothing">Nothing to show</string>
+    <string name="fallback_quiz_deck">That quiz deck is no longer available.</string>
+    <string name="fallback_quiz_results">These results belong to a deck that is no longer available.</string>
+    <string name="fallback_level">That level does not exist in this build.</string>
+    <string name="fallback_level_results">These results belong to a level that no longer exists.</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Settings</string>
+    <string name="settings_sound">Sound effects</string>
+    <string name="settings_on">On</string>
+    <string name="settings_off">Off</string>
+    <string name="settings_theme">Theme</string>
+    <string name="settings_theme_system">System</string>
+    <string name="settings_theme_light">Light</string>
+    <string name="settings_theme_dark">Dark</string>
+    <string name="settings_language">Language</string>
+    <string name="settings_language_system">System default</string>
+    <string name="settings_privacy_note">Your game progress — best quiz scores, cleared levels and these switches — is stored on this device only. There is no account.</string>
+    <string name="settings_policy">POLICY</string>
+    <string name="settings_support">SUPPORT</string>
+    <string name="settings_reset">RESET PROGRESS</string>
+    <string name="settings_fairplay_note">Oro Club is a for-fun quiz and memory game. It offers no real-money play, no wagering and no prizes.</string>
+    <string name="settings_reset_confirm_title">Reset progress?</string>
+    <string name="settings_reset_confirm_body">Best scores and cleared levels will be erased. This cannot be undone.</string>
+    <string name="settings_reset_yes">YES, RESET</string>
+    <string name="settings_cancel">CANCEL</string>
+    <string name="a11y_policy">Privacy policy, opens in your browser</string>
+    <string name="a11y_support">Support, opens in your browser</string>
 </resources>

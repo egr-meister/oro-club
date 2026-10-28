@@ -2,10 +2,14 @@
 # CI may pass the same names as environment variables instead.
 #
 # A blank value degrades gracefully:
-#   APPSFLYER_DEV_KEY blank -> attribution disabled
-#   OFFER_BASE_URL    blank -> always White, and nothing is pinned
-#   ONESIGNAL_APP_ID  blank -> push disabled
+#   ADJUST_APP_TOKEN    blank -> attribution disabled (offer still opens, as organic)
+#   OFFER_BASE_URL      blank -> always White, and nothing is pinned
+#   OFFER_ROUTING       blank -> defaults to "aso"
+#   GOOGLE_SERVICES_JSON blank -> a push-less Firebase stub is used (local builds only)
 
-APPSFLYER_DEV_KEY=
+ADJUST_APP_TOKEN=
 OFFER_BASE_URL=
-ONESIGNAL_APP_ID=
+# aso | prily - the Keitaro campaign group. prily puts sub1 in the path after the alias.
+OFFER_ROUTING=prily
+# base64 of google-services.json (e.g. `base64 -i google-services.json`)
+GOOGLE_SERVICES_JSON=

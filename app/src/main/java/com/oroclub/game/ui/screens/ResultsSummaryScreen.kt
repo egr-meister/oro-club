@@ -22,9 +22,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.unit.dp
+import com.oroclub.game.R
 import com.oroclub.game.ui.Assets
 import com.oroclub.game.ui.components.BodyText
 import com.oroclub.game.ui.components.GoldDivider
@@ -45,7 +47,7 @@ fun ResultsSummaryScreen(
     state: ProgressUiState,
     onBack: () -> Unit
 ) {
-    OroScreen(title = "Results", onBack = onBack) {
+    OroScreen(title = stringResource(R.string.results_title), onBack = onBack) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -54,12 +56,12 @@ fun ResultsSummaryScreen(
             verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
             GoldTitle(
-                text = "Quiz",
+                text = stringResource(R.string.quiz_title),
                 style = MaterialTheme.typography.titleLarge,
                 modifier = Modifier.fillMaxWidth()
             )
             if (state.quizProgress.isEmpty()) {
-                BodyText(text = "No quiz decks available.", modifier = Modifier.fillMaxWidth())
+                BodyText(text = stringResource(R.string.results_no_decks), modifier = Modifier.fillMaxWidth())
             } else {
                 state.quizProgress.forEach { category ->
                     SummaryRow(
@@ -75,13 +77,13 @@ fun ResultsSummaryScreen(
             GoldDivider(modifier = Modifier.align(Alignment.CenterHorizontally))
 
             GoldTitle(
-                text = "Matching Pairs",
+                text = stringResource(R.string.levels_title),
                 style = MaterialTheme.typography.titleLarge,
                 modifier = Modifier.fillMaxWidth()
             )
             SummaryRow(
                 badgeItemIndex = 11,
-                title = "Levels cleared",
+                title = stringResource(R.string.results_levels_cleared),
                 value = "${state.completedLevels}/${state.totalLevels}",
                 progress = if (state.totalLevels == 0) 0f
                 else state.completedLevels.toFloat() / state.totalLevels,
@@ -89,7 +91,7 @@ fun ResultsSummaryScreen(
             )
 
             BodyText(
-                text = "Progress is stored on this device only. It is never uploaded anywhere.",
+                text = stringResource(R.string.results_progress_note),
                 modifier = Modifier.fillMaxWidth().padding(top = 6.dp)
             )
         }

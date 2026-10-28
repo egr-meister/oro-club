@@ -57,12 +57,13 @@
 -dontwarn androidx.compose.**
 
 # --- Integration SDKs ------------------------------------------------------
--keep class com.appsflyer.** { *; }
--dontwarn com.appsflyer.**
+# Adjust and Play Install Referrer reach their classes by reflection; without
+# these keeps a minified release compiles and then fails at runtime - i.e. only
+# on live traffic. Firebase Messaging ships its own consumer rules.
+-keep class com.adjust.sdk.** { *; }
+-dontwarn com.adjust.sdk.**
 -keep class com.android.installreferrer.** { *; }
 -dontwarn com.android.installreferrer.**
--keep class com.onesignal.** { *; }
--dontwarn com.onesignal.**
 
 # --- App entry points ------------------------------------------------------
 -keep class com.oroclub.game.OroClubApp { *; }

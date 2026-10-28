@@ -2,90 +2,91 @@ package com.oroclub.game.integration
 
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
 import com.oroclub.game.BuildConfig
 import java.util.concurrent.Executors
 
+/**
+ * Decides White vs Black WITHOUT touching the network. The only request that reaches the
+ * tracker is the WebView opening the campaign link - that single click is the install's
+ * click, and [OfferWebViewClient] turns the tracker's answer into the verdict.
+ */
 object TrafficRouter {
-
-    private const val TAG = "TrafficRouter"
 
     private val executor = Executors.newSingleThreadExecutor()
     private val mainHandler = Handler(Looper.getMainLooper())
 
-    /**
-     * Blocking: AccelerometerProbe.await() waits out the sampling window, and the
-     * attribution map is a SharedPreferences read. Only ever called from [route]'s
-     * background executor.
-     */
+    fun route(onResult: (RouteDecision) -> Unit) {
+        // A pinned White answers instantly, without building a URL or waiting on signals.
+        if (IntegrationStorage.isWhiteLocked) {
+            deliver(RouteDecision.White, onResult)
+            return
+        }
+        // A fresh cached address is reused for 24h: repeated launches cost one click, not one each.
+        IntegrationStorage.freshOfferUrl()?.let {
+            deliver(RouteDecision.Black(it, fromCache = true), onResult)
+            return
+        }
+        if (BuildConfig.OFFER_BASE_URL.isBlank()) {
+            // A build with no campaign link shows White but pins NOTHING - a later build
+            // with a real URL must still get its chance.
+            deliver(RouteDecision.White, onResult)
+            return
+        }
+
+        // Building the URL waits out the accelerometer window and the token latch, so it
+        // runs off the main thread.
+        executor.execute {
+            val url = buildOfferUrl()
+            deliver(
+                if (url.isBlank()) RouteDecision.White else RouteDecision.Black(url, fromCache = false),
+                onResult
+            )
+        }
+    }
+
+    /** Blocking (device signals, token). Only ever called from the background executor. */
     fun buildOfferUrl(): String = OfferUrlBuilder.build(
         baseUrl = BuildConfig.OFFER_BASE_URL,
-        // The whole map. Hand-picking campaign/af_status/media_source here is the classic
-        // regression: it compiles, it runs, and the network quietly loses parameters.
-        appsFlyerParams = IntegrationStorage.attributionParams,
-        appsFlyerId = IntegrationStorage.appsFlyerId,
-        extra = deviceSignals()
+        // The whole map. Hand-picking "the keys we need" is the classic regression: it
+        // compiles, it runs, and the network quietly loses parameters.
+        attribution = IntegrationStorage.attributionParams,
+        adid = IntegrationStorage.adid,
+        extras = deviceSignals(),
+        sub1InPath = BuildConfig.OFFER_ROUTING == "prily"
     )
 
     /**
-     * All of them go out on every request, including with an "empty" value: the offer side
-     * has to tell a real negative answer apart from a signal that never arrived. There is
-     * deliberately no "skip when blank" branch here.
+     * A pushed deep link is opened as sent; only the push identifiers are appended, so the
+     * push service can tie the open back to this install. Inserted before any fragment.
+     * Called from a background thread (it waits on the token latch).
+     */
+    fun appendPushParams(url: String): String {
+        if (url.isBlank()) return url
+        val hash = url.indexOf('#')
+        val base = if (hash >= 0) url.substring(0, hash) else url
+        val fragment = if (hash >= 0) url.substring(hash) else ""
+        val query = CampaignParser.toQuery(
+            linkedMapOf(
+                "push_token" to PushManager.awaitToken(),
+                "push_id" to IntegrationStorage.pushId
+            )
+        )
+        val separator = if (base.contains('?')) '&' else '?'
+        return base + separator + query + fragment
+    }
+
+    /**
+     * All of them go out on every request, including with an empty value: the offer side
+     * has to tell a real negative answer from a signal that never arrived. There is
+     * deliberately no "skip when blank" branch.
      */
     private fun deviceSignals(): Map<String, String> = linkedMapOf(
         "sub12" to DeviceSignals.battery,
         "sub13" to AccelerometerProbe.await(),
         "sub14" to DeviceSignals.isTestEnvironment.toString(),
-        "sub_id_15" to attributionStatus().value
+        "push_token" to PushManager.awaitToken(),
+        "push_id" to IntegrationStorage.pushId
     )
-
-    /**
-     * Why this URL carries the attribution it carries. A campaign long enough to produce
-     * its own sub_id_15 is overridden by this value, same as the other signals.
-     */
-    private fun attributionStatus(): AttributionStatus = AttributionStatus.of(
-        attributionEnabled = IntegrationStorage.attributionEnabled,
-        devKeyPresent = BuildConfig.APPSFLYER_DEV_KEY.isNotBlank(),
-        resolved = AppsFlyerManager.isAttributionResolved,
-        hasAttribution = IntegrationStorage.hasAttribution
-    )
-
-    fun route(probe: OfferProbe = HttpOfferProbe(), onResult: (RouteDecision) -> Unit) {
-        // A pinned branch is answered without touching the network, so relaunches are
-        // instant and cannot flip the user between sides.
-        if (IntegrationStorage.whiteLocked) {
-            deliver(RouteDecision.White, onResult)
-            return
-        }
-        val cached = IntegrationStorage.cachedOfferUrl
-        if (!cached.isNullOrBlank()) {
-            deliver(RouteDecision.Black(cached), onResult)
-            return
-        }
-        if (BuildConfig.OFFER_BASE_URL.isBlank()) {
-            // Nothing to probe. Show White, but pin nothing - a later build with a real
-            // URL must still get its chance.
-            deliver(RouteDecision.White, onResult)
-            return
-        }
-
-        executor.execute {
-            val url = buildOfferUrl()
-            val decision = runCatching { RoutingRules.decide(probe.probe(url), url) }
-                .onFailure { Log.w(TAG, "Offer probe failed for $url", it) }
-                .getOrNull()
-
-            when (decision) {
-                is RouteDecision.Black -> IntegrationStorage.cachedOfferUrl = decision.url
-                RouteDecision.White -> IntegrationStorage.whiteLocked = true
-                // Network or TLS error: not an answer about this install. Fall back to
-                // White for this launch and pin nothing so the next one asks again.
-                null -> Unit
-            }
-
-            deliver(decision ?: RouteDecision.White, onResult)
-        }
-    }
 
     private fun deliver(decision: RouteDecision, onResult: (RouteDecision) -> Unit) {
         mainHandler.post { onResult(decision) }

@@ -15,9 +15,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.oroclub.game.R
 import com.oroclub.game.domain.GameLogic
 import com.oroclub.game.ui.components.BodyText
 import com.oroclub.game.ui.components.PlateButton
@@ -38,13 +40,13 @@ fun LevelsScreen(
     onRules: () -> Unit,
     onBack: () -> Unit
 ) {
-    OroScreen(title = "Matching Pairs", onBack = onBack) {
+    OroScreen(title = stringResource(R.string.levels_title), onBack = onBack) {
         Column(
             modifier = Modifier.fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             BodyText(
-                text = "Cleared ${state.completedLevels} of ${state.totalLevels} levels",
+                text = stringResource(R.string.levels_cleared_count, state.completedLevels, state.totalLevels),
                 modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
             )
             LazyVerticalGrid(
@@ -68,7 +70,7 @@ fun LevelsScreen(
                 }
             }
             PlateButton(
-                text = "GAME RULES",
+                text = stringResource(R.string.menu_rules),
                 onClick = onRules,
                 modifier = Modifier.fillMaxWidth(0.7f).padding(vertical = 10.dp)
             )
@@ -109,7 +111,12 @@ private fun LevelBubble(
                     style = MaterialTheme.typography.headlineSmall
                 )
                 Text(
-                    text = if (unlocked) (if (completed) "CLEARED" else "$pairs pairs") else "LOCKED",
+                    text = if (unlocked) {
+                        if (completed) stringResource(R.string.level_cleared)
+                        else stringResource(R.string.level_pairs_count, pairs)
+                    } else {
+                        stringResource(R.string.level_locked)
+                    },
                     color = TextMuted,
                     fontSize = 9.sp,
                     letterSpacing = 0.8.sp,

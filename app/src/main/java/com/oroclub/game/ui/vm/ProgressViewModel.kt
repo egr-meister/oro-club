@@ -7,6 +7,7 @@ import com.oroclub.game.audio.SoundManager
 import com.oroclub.game.data.GameRepository
 import com.oroclub.game.domain.GameLogic
 import com.oroclub.game.domain.QuizContent
+import com.oroclub.game.ui.theme.ThemeMode
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
@@ -26,6 +27,7 @@ data class CategoryProgress(
 data class ProgressUiState(
     val loaded: Boolean = false,
     val soundEnabled: Boolean = true,
+    val themeMode: ThemeMode = ThemeMode.DARK,
     val quizProgress: List<CategoryProgress> = emptyList(),
     val pairsBest: Map<String, Int> = emptyMap(),
     val completedLevels: Int = 0,
@@ -43,6 +45,7 @@ class ProgressViewModel(private val repository: GameRepository) : ViewModel() {
             ProgressUiState(
                 loaded = true,
                 soundEnabled = data.settings.soundEnabled,
+                themeMode = ThemeMode.fromStorage(data.settings.themeMode),
                 quizProgress = QuizContent.categories.map { category ->
                     CategoryProgress(
                         id = category.id,
@@ -68,6 +71,11 @@ class ProgressViewModel(private val repository: GameRepository) : ViewModel() {
         SoundManager.setEnabled(enabled)
         SoundManager.click()
         viewModelScope.launch { repository.setSoundEnabled(enabled) }
+    }
+
+    fun setThemeMode(mode: ThemeMode) {
+        SoundManager.click()
+        viewModelScope.launch { repository.setThemeMode(mode.storageKey) }
     }
 
     fun resetProgress() {

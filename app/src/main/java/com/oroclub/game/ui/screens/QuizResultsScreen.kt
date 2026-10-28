@@ -10,7 +10,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.oroclub.game.R
 import com.oroclub.game.ui.Assets
 import com.oroclub.game.ui.components.BodyText
 import com.oroclub.game.ui.components.CenteredScrollContent
@@ -37,11 +39,11 @@ fun QuizResultsScreen(
     onMenu: () -> Unit
 ) {
     val verdict = when {
-        total <= 0 -> "Round over"
-        score == total -> "A flawless hand"
-        score >= (total * 7) / 10 -> "The joker approves"
-        score >= total / 2 -> "A fair run"
-        else -> "The deck was unkind"
+        total <= 0 -> stringResource(R.string.quiz_result_round_over)
+        score == total -> stringResource(R.string.quiz_result_flawless)
+        score >= (total * 7) / 10 -> stringResource(R.string.quiz_result_approves)
+        score >= total / 2 -> stringResource(R.string.quiz_result_fair)
+        else -> stringResource(R.string.quiz_result_unkind)
     }
 
     OroBackground {
@@ -56,14 +58,14 @@ fun QuizResultsScreen(
                 GoldTitle(text = verdict, style = MaterialTheme.typography.headlineSmall)
                 GoldDivider()
                 StrongText(
-                    text = "Score: $score/$total",
+                    text = stringResource(R.string.quiz_result_score, score, total),
                     style = MaterialTheme.typography.displaySmall,
                     color = Gold
                 )
                 BodyText(text = categoryTitle)
-                PlateButton("CONTINUE", onContinue, Modifier.fillMaxWidth(0.86f))
-                PlateButton("RESTART", onRestart, Modifier.fillMaxWidth(0.86f))
-                PlateButton("MENU", onMenu, Modifier.fillMaxWidth(0.86f))
+                PlateButton(stringResource(R.string.btn_continue), onContinue, Modifier.fillMaxWidth(0.86f))
+                PlateButton(stringResource(R.string.btn_restart), onRestart, Modifier.fillMaxWidth(0.86f))
+                PlateButton(stringResource(R.string.btn_menu), onMenu, Modifier.fillMaxWidth(0.86f))
             }
         }
     }

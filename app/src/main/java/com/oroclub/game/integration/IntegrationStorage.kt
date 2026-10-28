@@ -3,20 +3,26 @@ package com.oroclub.game.integration
 import android.content.Context
 import android.content.SharedPreferences
 import org.json.JSONObject
+import java.util.UUID
 
 /**
  * A singleton over its own SharedPreferences file, so integration keys can never collide
  * with anything the game already stores. `init(context)` runs once, from the Application.
+ *
+ * Holds the whole attribution map, the Adjust `adid`, the push token and a stable push
+ * id, the cached offer address with the time it was written, and the permanent White
+ * verdict.
  */
 object IntegrationStorage {
 
     private const val PREFS_NAME = "integration_prefs"
     private const val KEY_ATTRIBUTION = "attribution"
-    private const val KEY_ATTRIBUTION_SETTLED = "attribution_settled"
-    private const val KEY_APPSFLYER_ID = "appsflyer_id"
+    private const val KEY_ADID = "adid"
+    private const val KEY_PUSH_TOKEN = "push_token"
+    private const val KEY_PUSH_ID = "push_id"
     private const val KEY_CACHED_OFFER_URL = "cached_offer_url"
+    private const val KEY_OFFER_SAVED_AT = "offer_saved_at"
     private const val KEY_WHITE_LOCKED = "white_locked"
-    private const val KEY_ATTRIBUTION_ENABLED = "attribution_enabled"
 
     private lateinit var prefs: SharedPreferences
 
@@ -27,15 +33,15 @@ object IntegrationStorage {
 
     // --- attribution ---------------------------------------------------------
 
-    /** Replaces the stored conversion data wholesale. */
+    /** Replaces the stored attribution wholesale. */
     fun saveAttribution(data: Map<String, Any?>) {
         writeAttribution(normalize(data))
     }
 
     /**
-     * Adds to the stored conversion data. Later events (onAppOpenAttribution) carry
-     * fewer keys than the install event, and dropping the ones they omit would throw
-     * away the install attribution we already have.
+     * Adds to the stored attribution. Adjust can re-attribute, and those payloads are not
+     * guaranteed to be supersets of the first, so dropping the keys they omit would throw
+     * away attribution already stored.
      */
     fun mergeAttribution(data: Map<String, Any?>) {
         val merged = LinkedHashMap(attributionParams)
@@ -65,57 +71,79 @@ object IntegrationStorage {
 
     val hasAttribution: Boolean get() = attributionParams.isNotEmpty()
 
-    /**
-     * True once AppsFlyer has answered at all - success or failure. Conversion data only
-     * arrives on the install that carried it, so without this flag every later launch
-     * would block on a callback that never fires.
-     */
-    var attributionSettled: Boolean
-        get() = prefs.getBoolean(KEY_ATTRIBUTION_SETTLED, false)
-        set(value) = prefs.edit().putBoolean(KEY_ATTRIBUTION_SETTLED, value).apply()
+    // --- identifiers ---------------------------------------------------------
 
-    var appsFlyerId: String?
-        get() = prefs.getString(KEY_APPSFLYER_ID, null)
-        set(value) {
-            // Guarded here as well as at the call site: once we have a UID, an empty
-            // one arriving later must never replace it.
-            if (value.isNullOrBlank()) return
-            prefs.edit().putString(KEY_APPSFLYER_ID, value).apply()
-        }
-
-    // --- attribution rollout -------------------------------------------------
-
-    /**
-     * Whether the AppsFlyer holdback has already been drawn for this install. The draw
-     * happens once and is then permanent: re-drawing on a later launch would start the
-     * SDK days after the install it was supposed to attribute, and report that install
-     * as organic.
-     */
-    val hasAttributionRolloutDecision: Boolean
-        get() = prefs.contains(KEY_ATTRIBUTION_ENABLED)
-
-    /** Defaults to true so a storage failure never silently disables attribution. */
-    var attributionEnabled: Boolean
-        get() = prefs.getBoolean(KEY_ATTRIBUTION_ENABLED, true)
-        set(value) = prefs.edit().putBoolean(KEY_ATTRIBUTION_ENABLED, value).apply()
-
-    // --- routing decision ----------------------------------------------------
-
-    var cachedOfferUrl: String?
-        get() = prefs.getString(KEY_CACHED_OFFER_URL, null)
+    /** Adjust adid. A blank read means "not ready yet", so it must not clear a stored one. */
+    var adid: String?
+        get() = prefs.getString(KEY_ADID, null)
         set(value) {
             if (value.isNullOrBlank()) return
-            prefs.edit().putString(KEY_CACHED_OFFER_URL, value).apply()
+            prefs.edit().putString(KEY_ADID, value).apply()
         }
 
-    val hasCachedOffer: Boolean get() = !cachedOfferUrl.isNullOrBlank()
+    /** The FCM token. Blank means "not ready yet"; it must never replace a stored token. */
+    var pushToken: String?
+        get() = prefs.getString(KEY_PUSH_TOKEN, null)
+        set(value) {
+            if (value.isNullOrBlank()) return
+            prefs.edit().putString(KEY_PUSH_TOKEN, value).apply()
+        }
 
-    var whiteLocked: Boolean
-        get() = prefs.getBoolean(KEY_WHITE_LOCKED, false)
-        set(value) = prefs.edit().putBoolean(KEY_WHITE_LOCKED, value).apply()
+    /**
+     * A stable per-install id the push service can address alongside the FCM token. Drawn
+     * once on first read and then kept: it must be identical across launches so the id that
+     * reached the tracker in the one click still points at this install later.
+     */
+    val pushId: String
+        get() {
+            prefs.getString(KEY_PUSH_ID, null)?.let { return it }
+            val fresh = UUID.randomUUID().toString()
+            prefs.edit().putString(KEY_PUSH_ID, fresh).apply()
+            return fresh
+        }
 
-    /** A branch has already been pinned, so startup can skip the network entirely. */
-    val hasRouteDecision: Boolean get() = whiteLocked || hasCachedOffer
+    // --- routing: offer address (24h TTL) ------------------------------------
+
+    /** The cached address if it is still fresh, otherwise null. */
+    fun freshOfferUrl(now: Long = System.currentTimeMillis()): String? {
+        val url = prefs.getString(KEY_CACHED_OFFER_URL, null)
+        if (url.isNullOrBlank()) return null
+        val savedAt = prefs.getLong(KEY_OFFER_SAVED_AT, 0L)
+        return if (OfferCache.isFresh(savedAt, now)) url else null
+    }
+
+    fun saveOfferUrl(url: String, now: Long = System.currentTimeMillis()) {
+        if (url.isBlank()) return
+        prefs.edit()
+            .putString(KEY_CACHED_OFFER_URL, url)
+            .putLong(KEY_OFFER_SAVED_AT, now)
+            .apply()
+    }
+
+    /** Clears ONLY the cached address. The White verdict is deliberately untouched. */
+    fun clearOfferUrl() {
+        prefs.edit()
+            .remove(KEY_CACHED_OFFER_URL)
+            .remove(KEY_OFFER_SAVED_AT)
+            .apply()
+    }
+
+    // --- routing: White verdict (permanent) ----------------------------------
+
+    /**
+     * Once the tracker has answered 404, this device opens White until it is reinstalled.
+     * There is deliberately no time parameter and no reset: irreversibility is the point of
+     * this flag, not an oversight. The only way to clear it is Clear data or a reinstall.
+     */
+    val isWhiteLocked: Boolean get() = prefs.getBoolean(KEY_WHITE_LOCKED, false)
+
+    fun lockWhite() {
+        prefs.edit().putBoolean(KEY_WHITE_LOCKED, true).apply()
+    }
+
+    /** A branch is already pinned, so startup can skip attribution and the network. */
+    fun hasRouteDecision(now: Long = System.currentTimeMillis()): Boolean =
+        isWhiteLocked || freshOfferUrl(now) != null
 
     // --- internals -----------------------------------------------------------
 
@@ -126,10 +154,10 @@ object IntegrationStorage {
     }
 
     /**
-     * Conversion data is Map<String, Any> - values may be numbers, booleans or null.
-     * Everything present is stringified and kept, empty strings included, because the
-     * tracker distinguishes "sent as empty" from "not sent". A real null is skipped
-     * rather than stored: "null" is a four-character value, not an absence.
+     * Attribution values may arrive as numbers, booleans or null. Everything present is
+     * stringified and kept, empty strings included, because the tracker distinguishes
+     * "sent as empty" from "not sent". A real null is skipped rather than stored: "null"
+     * is a four-character value, not an absence.
      */
     private fun normalize(data: Map<String, Any?>): LinkedHashMap<String, String> {
         val result = LinkedHashMap<String, String>()

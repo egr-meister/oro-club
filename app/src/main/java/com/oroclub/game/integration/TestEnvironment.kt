@@ -8,7 +8,6 @@ object TestEnvironment {
         val instrumentationPresent: Boolean = false,
         val debuggerConnected: Boolean = false,
         val debuggable: Boolean = false,
-        val adbEnabled: String? = null,
         val hardware: String = "",
         val product: String = "",
         val model: String = "",
@@ -39,10 +38,11 @@ object TestEnvironment {
             s.instrumentationPresent ||
             s.debuggerConnected ||
             s.debuggable ||
-            // Fires on any user who left developer options on, and there are more of them
-            // than you would guess. Kept on its own line so it can be dropped alone.
-            s.adbEnabled == "1" ||
             isEmulator(s)
+    // Deliberately NOT here (see device-signals.md): Settings.Global.ADB_ENABLED fires on
+    // every user who ever opened developer options, and a test-keys fingerprint on every
+    // AOSP-derived ROM - both are real people, and flagging them as test traffic hands the
+    // offer side a reason to drop paying users.
 
     fun isEmulator(s: Snapshot): Boolean {
         val hardware = s.hardware.lowercase()
@@ -61,11 +61,6 @@ object TestEnvironment {
         if (s.manufacturer.lowercase().contains("genymotion")) return true
 
         if (fingerprint.startsWith("generic") || fingerprint.contains("/sdk_")) return true
-
-        // Noisy in the same way ADB_ENABLED is: every AOSP-derived custom ROM and a long
-        // tail of grey-market retail devices ship test-keys builds, and those are real
-        // users. On its own line so it can be dropped alone.
-        if (fingerprint.endsWith("test-keys")) return true
 
         // Both, not either - a single "generic" is common enough on real hardware.
         if (s.brand.lowercase().startsWith("generic") &&

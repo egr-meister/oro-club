@@ -1,8 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <!-- Base app theme. Compose draws everything; this only controls the window. -->
-    <style name="Theme.OroClub" parent="android:Theme.Material.NoActionBar">
+    <!--
+      Base app theme. Compose draws everything; this only controls the window. The parent
+      is an AppCompat theme because MainActivity is an AppCompatActivity (required for the
+      language picker to persist below API 33).
+    -->
+    <style name="Theme.OroClub" parent="Theme.AppCompat.DayNight.NoActionBar">
         <item name="android:windowBackground">@color/oro_ink</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>

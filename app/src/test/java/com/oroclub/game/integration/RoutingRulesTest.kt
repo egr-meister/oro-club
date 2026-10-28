@@ -1,51 +1,22 @@
 package com.oroclub.game.integration
 
-import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class RoutingRulesTest {
 
-    private val requested = "https://d.cfd/android1?campaign=android1"
-
     @Test
-    fun `404 means White`() {
-        val decision = RoutingRules.decide(ProbeResult(404, requested), requested)
-        assertEquals(RouteDecision.White, decision)
+    fun `404 on the main frame means White`() {
+        assertTrue(RoutingRules.isWhite(404))
     }
 
     @Test
-    fun `every other status means Black`() {
-        listOf(200, 201, 204, 301, 302, 400, 401, 403, 418, 500, 502, 503).forEach { code ->
-            val decision = RoutingRules.decide(ProbeResult(code, requested), requested)
-            assertTrue("code $code should be Black", decision is RouteDecision.Black)
+    fun `every other status is not White`() {
+        // 403 in particular is NOT White: it is a WAF, not the tracker's answer, and the
+        // verdict is permanent.
+        listOf(200, 201, 204, 301, 302, 400, 401, 403, 410, 418, 500, 502, 503).forEach { code ->
+            assertFalse("code $code must not be White", RoutingRules.isWhite(code))
         }
-    }
-
-    @Test
-    fun `Black carries the final URL after redirects`() {
-        val decision = RoutingRules.decide(
-            ProbeResult(200, "https://d.cfd/final?x=1"),
-            requested
-        )
-        assertEquals(RouteDecision.Black("https://d.cfd/final?x=1"), decision)
-    }
-
-    @Test
-    fun `a missing or blank final URL falls back to the requested one`() {
-        assertEquals(
-            RouteDecision.Black(requested),
-            RoutingRules.decide(ProbeResult(200, null), requested)
-        )
-        assertEquals(
-            RouteDecision.Black(requested),
-            RoutingRules.decide(ProbeResult(200, "   "), requested)
-        )
-    }
-
-    @Test
-    fun `the probe seam can be faked without a network`() {
-        val probe = OfferProbe { url -> ProbeResult(404, url) }
-        assertEquals(RouteDecision.White, RoutingRules.decide(probe.probe(requested), requested))
     }
 }

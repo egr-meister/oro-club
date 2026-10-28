@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Integration layer chrome -->
+    <string name="loading">ЗАГРУЗКА</string>
+    <string name="offer_error_title">Что-то пошло не так</string>
+    <string name="offer_error_body">Не удалось загрузить страницу. Проверьте соединение и попробуйте снова.</string>
+    <string name="retry">ПОВТОРИТЬ</string>
+
+    <!-- Shared buttons -->
+    <string name="btn_continue">ПРОДОЛЖИТЬ</string>
+    <string name="btn_restart">ЗАНОВО</string>
+    <string name="btn_menu">МЕНЮ</string>
+    <string name="btn_back">НАЗАД</string>
+    <string name="btn_next_level">СЛЕДУЮЩИЙ УРОВЕНЬ</string>
+    <string name="a11y_back">Назад</string>
+    <string name="a11y_pause">Пауза</string>
+
+    <!-- Main -->
+    <string name="main_tagline">ЗАЙМИТЕ МЕСТО ЗА ЗОЛОТЫМ СТОЛОМ</string>
+    <string name="main_enter">ВОЙТИ В КЛУБ</string>
+
+    <!-- Menu -->
+    <string name="menu_title">Клуб</string>
+    <string name="menu_pick">Выберите стол</string>
+    <string name="menu_quiz">ВИКТОРИНА</string>
+    <string name="menu_pairs">ПАРЫ</string>
+    <string name="menu_results">РЕЗУЛЬТАТЫ</string>
+    <string name="menu_rules">ПРАВИЛА ИГРЫ</string>
+    <string name="menu_settings">НАСТРОЙКИ</string>
+
+    <!-- Levels -->
+    <string name="levels_title">Парный поиск</string>
+    <string name="levels_cleared_count">Пройдено %1$d из %2$d уровней</string>
+    <string name="level_cleared">ПРОЙДЕНО</string>
+    <string name="level_locked">ЗАКРЫТО</string>
+    <string name="level_pairs_count">%1$d пар</string>
+
+    <!-- Quiz categories -->
+    <string name="quiz_title">Викторина</string>
+    <string name="quiz_intro">Десять вопросов в каждой колоде. Отвечайте — и стол ответит вам.</string>
+    <string name="quiz_none">В этой сборке нет доступных колод викторины.</string>
+    <string name="quiz_best">Рекорд %1$d/%2$d</string>
+    <string name="quiz_play">ИГРАТЬ</string>
+
+    <!-- Quiz round -->
+    <string name="quiz_score_so_far">Счёт: %1$d</string>
+
+    <!-- Quiz results -->
+    <string name="quiz_result_round_over">Раунд окончен</string>
+    <string name="quiz_result_flawless">Безупречная партия</string>
+    <string name="quiz_result_approves">Джокер доволен</string>
+    <string name="quiz_result_fair">Неплохой заход</string>
+    <string name="quiz_result_unkind">Колода была сурова</string>
+    <string name="quiz_result_score">Счёт: %1$d/%2$d</string>
+
+    <!-- Pairs round -->
+    <string name="pairs_level_title">Уровень %1$d</string>
+    <string name="pairs_counter">Пары %1$d/%2$d</string>
+
+    <!-- Pairs results -->
+    <string name="pairs_well_done">Отлично</string>
+    <string name="pairs_out_of_time">Время вышло</string>
+    <string name="pairs_level_cleared">Уровень %1$d пройден</string>
+    <string name="pairs_level_not_cleared">Уровень %1$d не пройден</string>
+    <string name="pairs_matched">Найдено пар: %1$d/%2$d</string>
+    <string name="pairs_next_open">Следующий стол открыт.</string>
+    <string name="pairs_all_cleared">Все столы клуба пройдены.</string>
+    <string name="pairs_try_again">Попробуйте этот стол снова — колода перемешивается.</string>
+
+    <!-- Results summary -->
+    <string name="results_title">Результаты</string>
+    <string name="results_no_decks">Нет доступных колод викторины.</string>
+    <string name="results_levels_cleared">Пройдено уровней</string>
+    <string name="results_progress_note">Прогресс хранится только на этом устройстве. Он никуда не загружается.</string>
+
+    <!-- Rules -->
+    <string name="rules_title">Правила игры</string>
+    <string name="rules_quiz_title">Викторина</string>
+    <string name="rules_quiz_body">Выберите одну из трёх тематических колод. В каждой колоде десять вопросов с одним верным ответом. Нажмите на ответ — он сразу откроется: верный вариант отмечается галочкой, неверный выбор — крестиком, затем следующий вопрос появляется сам. Лучший счёт по каждой колоде сохраняется.</string>
+    <string name="rules_pairs_title">Парный поиск</string>
+    <string name="rules_pairs_body">Девять уровней, на каждом больше карт и больше времени. Переверните две карты: совпавшая пара остаётся открытой, несовпадение переворачивается обратно. Найдите все пары до конца таймера, чтобы пройти уровень. Пройдите уровень, чтобы открыть следующий.</string>
+    <string name="rules_pause_title">Пауза</string>
+    <string name="rules_pause_body">Нажмите на значок паузы в любой момент. Пока панель открыта, таймер стоит, и вы можете продолжить, начать раунд заново или вернуться в меню.</string>
+    <string name="rules_progress_title">Ваш прогресс</string>
+    <string name="rules_progress_body">Лучшие счёта викторины, пройденные уровни и переключатель звука сохраняются только на этом устройстве. Сбросить их можно в любой момент в настройках.</string>
+    <string name="rules_fair_title">Честная игра</string>
+    <string name="rules_fair_body">Oro Club — одиночная игра для развлечения. Здесь нет ставок, игры на реальные деньги, призов и какой-либо онлайн-составляющей.</string>
+    <string name="rules_footer">Oro Club — Золотой клуб джокера</string>
+
+    <!-- Pause overlay -->
+    <string name="pause_title">Пауза</string>
+    <string name="pause_body">Стол подождёт. Не спешите.</string>
+
+    <!-- Fallback -->
+    <string name="fallback_nothing">Нечего показать</string>
+    <string name="fallback_quiz_deck">Эта колода викторины больше недоступна.</string>
+    <string name="fallback_quiz_results">Эти результаты относятся к колоде, которая больше недоступна.</string>
+    <string name="fallback_level">Такого уровня нет в этой сборке.</string>
+    <string name="fallback_level_results">Эти результаты относятся к уровню, которого больше нет.</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Настройки</string>
+    <string name="settings_sound">Звуковые эффекты</string>
+    <string name="settings_on">Вкл.</string>
+    <string name="settings_off">Выкл.</string>
+    <string name="settings_theme">Тема</string>
+    <string name="settings_theme_system">Системная</string>
+    <string name="settings_theme_light">Светлая</string>
+    <string name="settings_theme_dark">Тёмная</string>
+    <string name="settings_language">Язык</string>
+    <string name="settings_language_system">Как в системе</string>
+    <string name="settings_privacy_note">Ваш игровой прогресс — лучшие счёта викторины, пройденные уровни и эти переключатели — хранится только на этом устройстве. Аккаунта нет.</string>
+    <string name="settings_policy">ПОЛИТИКА</string>
+    <string name="settings_support">ПОДДЕРЖКА</string>
+    <string name="settings_reset">СБРОСИТЬ ПРОГРЕСС</string>
+    <string name="settings_fairplay_note">Oro Club — викторина и игра на память для развлечения. Без игры на реальные деньги, ставок и призов.</string>
+    <string name="settings_reset_confirm_title">Сбросить прогресс?</string>
+    <string name="settings_reset_confirm_body">Лучшие счёта и пройденные уровни будут стёрты. Это нельзя отменить.</string>
+    <string name="settings_reset_yes">ДА, СБРОСИТЬ</string>
+    <string name="settings_cancel">ОТМЕНА</string>
+    <string name="a11y_policy">Политика конфиденциальности, откроется в браузере</string>
+    <string name="a11y_support">Поддержка, откроется в браузере</string>
+</resources>

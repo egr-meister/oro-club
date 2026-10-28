@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Integration layer chrome -->
+    <string name="loading">CARICAMENTO</string>
+    <string name="offer_error_title">Qualcosa è andato storto</string>
+    <string name="offer_error_body">Impossibile caricare la pagina. Controlla la connessione e riprova.</string>
+    <string name="retry">RIPROVA</string>
+
+    <!-- Shared buttons -->
+    <string name="btn_continue">CONTINUA</string>
+    <string name="btn_restart">RICOMINCIA</string>
+    <string name="btn_menu">MENU</string>
+    <string name="btn_back">INDIETRO</string>
+    <string name="btn_next_level">LIVELLO SUCCESSIVO</string>
+    <string name="a11y_back">Indietro</string>
+    <string name="a11y_pause">Pausa</string>
+
+    <!-- Main -->
+    <string name="main_tagline">PRENDI POSTO AL TAVOLO DORATO</string>
+    <string name="main_enter">ENTRA NEL CLUB</string>
+
+    <!-- Menu -->
+    <string name="menu_title">Il Club</string>
+    <string name="menu_pick">Scegli il tuo tavolo</string>
+    <string name="menu_quiz">QUIZ</string>
+    <string name="menu_pairs">COPPIE</string>
+    <string name="menu_results">RISULTATI</string>
+    <string name="menu_rules">REGOLE DEL GIOCO</string>
+    <string name="menu_settings">IMPOSTAZIONI</string>
+
+    <!-- Levels -->
+    <string name="levels_title">Trova le coppie</string>
+    <string name="levels_cleared_count">%1$d di %2$d livelli completati</string>
+    <string name="level_cleared">COMPLETATO</string>
+    <string name="level_locked">BLOCCATO</string>
+    <string name="level_pairs_count">%1$d coppie</string>
+
+    <!-- Quiz categories -->
+    <string name="quiz_title">Quiz</string>
+    <string name="quiz_intro">Dieci domande per mazzo. Rispondi, e il tavolo ti risponde.</string>
+    <string name="quiz_none">Nessun mazzo di quiz disponibile in questa versione.</string>
+    <string name="quiz_best">Record %1$d/%2$d</string>
+    <string name="quiz_play">GIOCA</string>
+
+    <!-- Quiz round -->
+    <string name="quiz_score_so_far">Punteggio: %1$d</string>
+
+    <!-- Quiz results -->
+    <string name="quiz_result_round_over">Turno terminato</string>
+    <string name="quiz_result_flawless">Una mano perfetta</string>
+    <string name="quiz_result_approves">Il joker approva</string>
+    <string name="quiz_result_fair">Una buona partita</string>
+    <string name="quiz_result_unkind">Il mazzo è stato crudele</string>
+    <string name="quiz_result_score">Punteggio: %1$d/%2$d</string>
+
+    <!-- Pairs round -->
+    <string name="pairs_level_title">Livello %1$d</string>
+    <string name="pairs_counter">Coppie %1$d/%2$d</string>
+
+    <!-- Pairs results -->
+    <string name="pairs_well_done">Ben fatto</string>
+    <string name="pairs_out_of_time">Tempo scaduto</string>
+    <string name="pairs_level_cleared">Livello %1$d completato</string>
+    <string name="pairs_level_not_cleared">Livello %1$d non completato</string>
+    <string name="pairs_matched">Coppie trovate: %1$d/%2$d</string>
+    <string name="pairs_next_open">Il tavolo successivo è aperto.</string>
+    <string name="pairs_all_cleared">Tutti i tavoli del club sono completati.</string>
+    <string name="pairs_try_again">Riprova lo stesso tavolo — il mazzo viene rimescolato.</string>
+
+    <!-- Results summary -->
+    <string name="results_title">Risultati</string>
+    <string name="results_no_decks">Nessun mazzo di quiz disponibile.</string>
+    <string name="results_levels_cleared">Livelli completati</string>
+    <string name="results_progress_note">I progressi sono salvati solo su questo dispositivo. Non vengono mai caricati altrove.</string>
+
+    <!-- Rules -->
+    <string name="rules_title">Regole del gioco</string>
+    <string name="rules_quiz_title">Quiz</string>
+    <string name="rules_quiz_body">Scegli uno dei tre mazzi a tema. Ogni mazzo ha dieci domande con una sola risposta corretta. Tocca una risposta e viene rivelata subito — l\'opzione corretta è segnata con un segno di spunta, una scelta sbagliata con una croce — poi la domanda successiva arriva da sola. Il tuo punteggio migliore per mazzo viene conservato.</string>
+    <string name="rules_pairs_title">Trova le coppie</string>
+    <string name="rules_pairs_body">Nove livelli, ognuno con più carte e più tempo. Gira due carte: una coppia uguale resta scoperta, un errore si rigira. Trova tutte le coppie prima che scada il tempo per superare il livello. Completa un livello per sbloccare il successivo.</string>
+    <string name="rules_pause_title">Pausa</string>
+    <string name="rules_pause_body">Tocca il gettone della pausa quando vuoi. Il tempo si ferma mentre il pannello è aperto, e puoi continuare, ricominciare il turno o tornare al menu.</string>
+    <string name="rules_progress_title">I tuoi progressi</string>
+    <string name="rules_progress_body">I migliori punteggi del quiz, i livelli completati e l\'interruttore del suono sono salvati su questo dispositivo e in nessun altro posto. Azzerali quando vuoi dalle impostazioni.</string>
+    <string name="rules_fair_title">Gioco leale</string>
+    <string name="rules_fair_body">Oro Club è un gioco per giocatore singolo a scopo di intrattenimento. Non ci sono scommesse, gioco con denaro reale, premi né alcuna componente online.</string>
+    <string name="rules_footer">Oro Club — Il club dorato del joker</string>
+
+    <!-- Pause overlay -->
+    <string name="pause_title">In pausa</string>
+    <string name="pause_body">Il tavolo aspetta. Prenditi il tuo tempo.</string>
+
+    <!-- Fallback -->
+    <string name="fallback_nothing">Niente da mostrare</string>
+    <string name="fallback_quiz_deck">Quel mazzo di quiz non è più disponibile.</string>
+    <string name="fallback_quiz_results">Questi risultati appartengono a un mazzo non più disponibile.</string>
+    <string name="fallback_level">Quel livello non esiste in questa versione.</string>
+    <string name="fallback_level_results">Questi risultati appartengono a un livello che non esiste più.</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Impostazioni</string>
+    <string name="settings_sound">Effetti sonori</string>
+    <string name="settings_on">Attivo</string>
+    <string name="settings_off">Disattivo</string>
+    <string name="settings_theme">Tema</string>
+    <string name="settings_theme_system">Sistema</string>
+    <string name="settings_theme_light">Chiaro</string>
+    <string name="settings_theme_dark">Scuro</string>
+    <string name="settings_language">Lingua</string>
+    <string name="settings_language_system">Lingua di sistema</string>
+    <string name="settings_privacy_note">I tuoi progressi — migliori punteggi, livelli completati e queste opzioni — sono salvati solo su questo dispositivo. Non c\'è alcun account.</string>
+    <string name="settings_policy">PRIVACY</string>
+    <string name="settings_support">ASSISTENZA</string>
+    <string name="settings_reset">AZZERA PROGRESSI</string>
+    <string name="settings_fairplay_note">Oro Club è un gioco di quiz e memoria per divertirsi. Nessun gioco con denaro reale, nessuna scommessa e nessun premio.</string>
+    <string name="settings_reset_confirm_title">Azzerare i progressi?</string>
+    <string name="settings_reset_confirm_body">I migliori punteggi e i livelli completati verranno cancellati. L\'operazione non può essere annullata.</string>
+    <string name="settings_reset_yes">SÌ, AZZERA</string>
+    <string name="settings_cancel">ANNULLA</string>
+    <string name="a11y_policy">Informativa sulla privacy, si apre nel browser</string>
+    <string name="a11y_support">Assistenza, si apre nel browser</string>
+</resources>

@@ -18,6 +18,11 @@ local.properties
 keystore.properties
 signing.properties
 
+# Firebase config is a secret, materialised at build time from GOOGLE_SERVICES_JSON.
+google-services.json
+app/src/debug/google-services.json
+app/src/release/google-services.json
+
 # Build outputs
 *.apk
 *.aab

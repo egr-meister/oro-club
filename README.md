@@ -9,8 +9,8 @@ install sees.
 * `minSdk 24` · `compileSdk 36` · `targetSdk 36` · JDK 17 · portrait only
 * **White** — the game. Entirely local: no account, no ads, no analytics inside
   it, no backend, no cloud. Section 3 describes its storage.
-* **Black** — a remote offer in a WebView, reached only when the routing probe
-  says so. Section 13 describes the whole layer.
+* **Black** — a remote offer in a WebView, reached only when the tracker's answer
+  to the campaign link says so. Section 14 describes the whole layer.
 
 > **Not gambling.** The game is a for-fun quiz and memory game with a joker /
 > playing-card / luck *theme*. There is no wagering, no real-money play, no
@@ -69,7 +69,7 @@ Three permissions exist for the integration layer only:
 
 | Permission | Used by |
 |---|---|
-| `INTERNET` | AppsFlyer attribution, the offer probe, the offer WebView, push |
+| `INTERNET` | Adjust attribution, the offer WebView, push |
 | `ACCESS_NETWORK_STATE` | the SDKs' own connectivity checks |
 | `POST_NOTIFICATIONS` | the Android 13+ push permission prompt |
 
@@ -78,17 +78,18 @@ flags.
 
 ### Missing integrations (deliberate)
 
-No networking library (Retrofit / OkHttp / Ktor — the probe is
-`HttpURLConnection`), no Firebase, no ads SDK, no payment or billing library, no
-maps, no login, no DI framework, no Room, no native libraries.
+No networking library (Retrofit / OkHttp / Ktor — the offer is opened by the
+WebView itself, there is no HTTP probe), no ads SDK, no payment or billing
+library, no maps, no login, no DI framework, no Room. Firebase Cloud Messaging is
+present for push; attribution is Adjust.
 
 ### Privacy
 
 Game progress never leaves the device. The integration layer is a different
-matter and should be described accurately in the store listing: AppsFlyer
-receives install attribution, OneSignal receives a push subscription keyed to
-the AppsFlyer UID, and on the Black branch the offer page is a third-party site
-inside a WebView with its own data practices.
+matter and should be described accurately in the store listing: Adjust receives
+install attribution, Firebase Cloud Messaging delivers push, and on the Black
+branch the offer page is a third-party site inside a WebView with its own data
+practices.
 
 ---
 
@@ -232,8 +233,8 @@ DataStore Preferences 1.1.1 · kotlinx-serialization-json 1.7.3 ·
 Gradle Kotlin DSL with a version catalog (`gradle/libs.versions.toml`) ·
 AGP 8.9.1 · Gradle 8.11.1 · JDK 17.
 
-Integration layer: AppsFlyer `af-android-sdk` 6.14.2 · OneSignal 5.1.6 ·
-`HttpURLConnection` · `android.webkit.WebView`.
+Integration layer: Adjust `adjust-android` 5.8.0 · Firebase Cloud Messaging
+(Firebase BOM 34.19.0) · `android.webkit.WebView`.
 
 Every package the code imports is a **direct** catalog dependency, including
 `androidx.compose.foundation`, `androidx.compose.animation` and
@@ -359,17 +360,17 @@ with junk keys, quiz content validation, and safe JSON handling
 (null / empty / corrupted / unknown keys / missing fields / round trip).
 
 The integration layer adds pure-JVM tests for `CampaignParser`,
-`OfferUrlBuilder`, `RoutingRules`, `UrlSchemes` and `DeepLinkRouter` — campaign
-explosion into `sub1..subN`, the exact reference URL (path segment + every
-AppsFlyer parameter + the original `campaign` + subs + `appsflyer_id`, and no
-`%2526`), the empty-`sub1` case, and the 404 → White / anything else → Black
-rule.
+`OfferUrlBuilder`, `RoutingRules`, `OfferCache`, `UrlSchemes` and
+`DeepLinkRouter` — campaign explosion into `sub1..subN`, the exact reference URL
+(path segment + every Adjust parameter + the original `campaign` + subs + `adid`,
+and no `%2526`), the empty-`sub1` case, the offer-cache TTL, and the
+404 → White / anything else → Black rule.
 
 ### 16 KB memory page size
 
-The app's own code is pure Kotlin/Compose with no native libraries. AppsFlyer
-and OneSignal are Java/Kotlin SDKs and do not ship `.so` files either, so there
-is nothing to re-align — but since that is now a property of third-party
+The app's own code is pure Kotlin/Compose with no native libraries. Adjust and
+Firebase Cloud Messaging are Java/Kotlin SDKs and do not ship `.so` files either,
+so there is nothing to re-align — but since that is now a property of third-party
 artifacts rather than of this source tree, verify it on every release:
 
 ```bash
@@ -498,15 +499,16 @@ adb logcat -c && adb logcat | grep -iE "oroclub|AndroidRuntime|FATAL"
 | `ANDROID_KEYSTORE_PASSWORD` | keystore password |
 | `ANDROID_KEY_ALIAS` | e.g. `oro-club` |
 | `ANDROID_KEY_PASSWORD` | key password |
-| `APPSFLYER_DEV_KEY` | the AppsFlyer dev key |
+| `ADJUST_APP_TOKEN` | the Adjust app token |
 | `OFFER_BASE_URL` | e.g. `https://oro-club.cfd/` |
-| `ONESIGNAL_APP_ID` | optional; push is skipped while it is empty |
+| `OFFER_ROUTING` | `aso` or `prily` (the Keitaro campaign group) |
+| `GOOGLE_SERVICES_JSON` | base64 of `google-services.json`, for push |
 
-`local.properties` is not committed, so the last three have to reach CI as
-secrets — otherwise the release builds with empty `BuildConfig` fields, ships
-without attribution or an offer URL, and always shows White. The workflow fails
+`local.properties` is not committed, so these have to reach CI as secrets —
+otherwise the release builds with empty `BuildConfig` fields, ships without
+attribution or an offer URL (always White) and without push. The workflow fails
 early rather than letting that reach Play; a deliberately White-only build means
-deleting the "Check the integration keys are present" step.
+deleting the "Check the integration secrets are present" step.
 
 > A green CI run proves the project **compiles and signs**. It does not prove the
 > app **launches**. Verify locally with the checklist in section 9 before every
@@ -531,9 +533,9 @@ defaults. Uninstalling the app removes the DataStore file entirely.
   drops any category that does not.
 * `mascot_b.png` is currently a mirrored variant of `mascot_a.png`. Drop in a
   genuine second pose under the same name when you have one.
-* English only. All copy is inline in the composables rather than in
-  `strings.xml`, which keeps the code readable but means adding a language is a
-  refactor, not a translation drop-in.
+* Seven UI languages (en default, ru/fr/es/pt/it/de) selectable in Settings;
+  `check_locales.sh` keeps the key sets in sync. Quiz questions, category titles
+  and match-icon names are game data kept in Kotlin and stay English.
 * The app runs full-screen: the status and navigation bars are hidden and come
   back only as transient bars on an edge swipe. Screens keep their safeDrawing
   padding so a transient bar never covers content.
@@ -548,8 +550,13 @@ defaults. Uninstalling the app removes the DataStore file entirely.
   places — bump both together.
 * There is no instrumentation test suite; verification of the UI is the manual
   checklist in section 9.
-* `ONESIGNAL_APP_ID` is not filled in yet. Push is skipped cleanly while it is
-  blank — the SDK is simply never initialised.
+* `GOOGLE_SERVICES_JSON` is not filled in yet. The build substitutes a push-less
+  Firebase stub locally and still runs; a release on CI fails until the real
+  base64 is provided.
+* `compileSdk`/`targetSdk` is 36 (Android 16), matching the published build and
+  the toolchain the skill's apps actually ship. 37 is not used: the AGP that
+  supports it is not available here, and 37 would also drop the
+  restricted-resizability escape hatch that holds the portrait lock on large screens.
 * The integration file names (`AetherApp`, `AetherRoot`) come from the
   integration spec rather than from this app's own naming; rename them to
   `OroClubIntegrationApp` / `OroClubRoot` if you prefer consistency, remembering
@@ -590,34 +597,41 @@ game or the offer:
 
 ```
 AetherApp.onCreate
-  -> IntegrationStorage.init -> UserAgentProvider.init
-  -> AppsFlyerManager.init -> OneSignalManager.init
+  -> IntegrationStorage.init -> DeviceSignals.init -> AccelerometerProbe.start
+  -> AdjustManager.init -> PushManager.init
 AetherRoot
-  -> wait for attribution (bounded, 8 s) -> TrafficRouter.route -> probe the offer URL
-       404           -> White: OroNavGraph, the game, untouched
-       anything else -> Black: OfferWebViewScreen(finalUrl)
+  -> wait for attribution (bounded, 8 s) -> TrafficRouter.route -> Black(campaign URL)
+  -> the WebView opens that URL itself; OfferWebViewClient reads the main-frame answer
+       main-frame 404 -> White: OroNavGraph, the game, untouched (pinned forever)
+       anything else  -> Black: the offer is shown; the first rendered page is cached 24h
   a push deep link outranks both
 ```
 
+There is no separate HTTP probe: the WebView's own request to the campaign link is
+the install's single click, and the tracker's answer to it is the verdict.
+
 ### Configuration
 
-Three values live in `local.properties` (never committed) and reach the code as
+These values live in `local.properties` (never committed) and reach the code as
 `BuildConfig` fields. `local.properties.example` documents them.
 
 ```properties
-APPSFLYER_DEV_KEY=HFivazsgCfe7DqgYACmnB9
+ADJUST_APP_TOKEN=xxxxxxxxxxxx
 OFFER_BASE_URL=https://oro-club.cfd/
-ONESIGNAL_APP_ID=
+OFFER_ROUTING=prily
+GOOGLE_SERVICES_JSON=<base64 of google-services.json>
 ```
 
-CI can pass the same three as environment variables instead. A blank
-`APPSFLYER_DEV_KEY` disables attribution, a blank `OFFER_BASE_URL` forces White
-without pinning it, and a blank `ONESIGNAL_APP_ID` disables push — so a build
-without any of them still runs as a plain game.
+CI can pass the same values as environment variables instead. A blank
+`ADJUST_APP_TOKEN` disables attribution, a blank `OFFER_BASE_URL` forces White
+without pinning it, and a missing `GOOGLE_SERVICES_JSON` builds with a push-less
+Firebase stub — so a build without any of them still runs as a plain game.
+`OFFER_ROUTING` is `aso` or `prily` (the Keitaro campaign group); `prily` also
+puts `sub1` in the path after the alias.
 
 ### The offer URL
 
-Every parameter AppsFlyer reports reaches the URL. Not a curated subset — all of
+Every parameter Adjust reports reaches the URL. Not a curated subset — all of
 them, including keys the network starts sending next month. The original
 `campaign` stays in the query **after** it has been exploded into `sub1..subN`,
 because the tracker reads both.
@@ -627,43 +641,22 @@ campaign = android1_AR_sub3%26_sub4_WBZ_sub6
         -> sub1=android1  sub2=AR  sub3=sub3%26  sub4=sub4  sub5=WBZ  sub6=sub6
 
 https://oro-club.cfd/android1
-  ?af_status=Non-organic&media_source=facebook
+  ?network=unityads&tracker_name=Oro+Club
   &campaign=android1_AR_sub3%26_sub4_WBZ_sub6
   &sub1=android1&sub2=AR&sub3=sub3%26&sub4=sub4&sub5=WBZ&sub6=sub6
-  &appsflyer_id=…
+  &sub12=85_true&sub13=…&sub14=false&push_token=…&push_id=…&adid=…
 ```
 
-`sub1` appears twice on purpose: as the path segment the tracker routes on, and
-as a query parameter it reads. A blank or missing `sub1` adds no path segment.
-An existing path on `OFFER_BASE_URL` is kept and `sub1` is appended after it.
+In `prily` routing `sub1` appears twice on purpose: as the path segment the
+tracker routes on, and as a query parameter it reads. A blank or missing `sub1`
+adds no path segment, and an existing path on `OFFER_BASE_URL` is kept with `sub1`
+appended after it. In `aso` routing the path is left untouched and `sub1` rides in
+the query only.
 
 `android.net.Uri.Builder` is deliberately not used: it re-encodes what is already
 encoded, turning `%26` into `%2526` and corrupting campaign values that legally
 contain encoded separators. `PercentEncoder` copies valid `%XX` triplets verbatim
 and encodes everything else, which makes it idempotent.
-
-### Attribution holdback
-
-One install in `AttributionRollout.DEFAULT_HOLDBACK_EVERY_NTH` (5) never starts
-AppsFlyer at all. The draw happens once, on the first launch, and is stored in
-`IntegrationStorage.attributionEnabled` — re-drawing on a later launch would
-start the SDK days after the install it was meant to attribute and report that
-install as organic. Set the constant to `0` to switch the holdback off.
-
-It is a random draw per install, not a counter: a device cannot know how many
-installs came before it. Over enough installs it averages to 20 % (measured
-20.02 % over 200 000 draws), but any given run of five is not guaranteed to hold
-back exactly one.
-
-A held-back install still routes normally — it just carries no attribution:
-
-* startup does not wait for a callback that will never come; the manager marks
-  itself resolved immediately, so there is no 8-second splash;
-* the offer URL goes out without `campaign`, `af_status`, `media_source`,
-  `sub1..subN` and `appsflyer_id` — and with no `sub1` there is no path segment
-  either, so the tracker sees a bare `OFFER_BASE_URL` plus `sub12`/`sub13`/`sub14`/`sub_id_15`;
-* OneSignal never gets an `external_id`, because that is the AppsFlyer UID, so
-  those installs cannot be addressed by external id in a push campaign.
 
 ### Device signals
 
@@ -676,25 +669,12 @@ signal that never arrived.
 | `sub12` | `<battery percent>_<on power>` | `85_true`, `-1_false` with no reading |
 | `sub13` | `<sample at launch>_<sample 1 s later>` | `0.123,-0.045,9.810_0.118,-0.051,9.807`, `na` per missing half |
 | `sub14` | test environment | `false` |
-| `sub_id_15` | why this URL carries the attribution it carries | `ok` |
+| `push_token` | the FCM token (so the push service can address this install) | `fxxx…` |
+| `push_id` | a stable per-install id generated once | a UUID |
 
-`sub_id_15` exists because every URL that arrives without campaign data otherwise
-looks identical on the tracker, whatever the cause:
-
-| Value | Meaning |
-|---|---|
-| `ok` | AppsFlyer ran and reported attribution |
-| `empty` | AppsFlyer ran and answered, but with no parameters (organic) |
-| `pending` | AppsFlyer ran but had not answered before the 8 s timeout |
-| `holdback` | the rollout held this install back; the SDK was never started |
-| `nokey` | the build shipped with a blank `APPSFLYER_DEV_KEY` — a mistake |
-
-The cause wins over the symptom: a held-back install also looks "resolved with
-no data", and so does a keyless build. Expect roughly 20 % `holdback` in a
-healthy release; any `nokey` at all means the CI secrets did not reach the
-build.
-
-They override a same-named segment coming out of a long campaign, so `sub12`
+`push_token` and `push_id` ride in the single click so the push service can tie a
+later push back to this install. `sub12`/`sub13`/`sub14`
+override a same-named segment coming out of a long campaign, so `sub12`
 can never appear twice. Battery percent uses the device's own `scale` (255 on a
 fair number of phones) and is `-1`, not `0`, when there is no reading;
 `STATUS_FULL` counts as on-power because many ROMs stop reporting `CHARGING` at
@@ -712,63 +692,54 @@ integration/
   TestEnvironment.kt    sub14 detection rules over a Snapshot (pure)
   AccelerometerProbe.kt one-second sensor window started at launch
   DeviceSignals.kt      platform reads for sub12 and sub14
-  IntegrationStorage.kt own SharedPreferences file: attribution, UID, pinned branch
-  AppsFlyerManager.kt   init, conversion-data callbacks, UID capture
+  IntegrationStorage.kt own SharedPreferences file: attribution, adid, token, cache, verdict
+  AdjustManager.kt      Adjust v5 init, attribution listener, adid, getAttributionWithTimeout
   CampaignParser.kt     campaign -> sub1..subN, plus PercentEncoder
-  OfferUrlBuilder.kt    base URL + every AppsFlyer param -> the offer URL
-  RoutingLogic.kt       RouteDecision, ProbeResult, OfferProbe, RoutingRules
-  TrafficRouter.kt      pinned branch, or probe on a background thread
-  HttpOfferProbe.kt     HttpURLConnection GET, manual redirects, plus UserAgentProvider
+  OfferUrlBuilder.kt    base URL + every Adjust param + signals -> the offer URL
+  RoutingLogic.kt       RouteDecision, RoutingRules (404 = White), OfferCache (24h TTL)
+  TrafficRouter.kt      pinned branch, or build the campaign URL on a background thread
   UrlSchemes.kt         which schemes stay in the WebView
-  OfferWebViewClient.kt external URLs to the system, internal ones cached
+  OfferWebViewClient.kt the verdict from the main-frame answer; external URLs to the system
   DeepLinkRouter.kt     push deep links, queued until a handler subscribes
-  OneSignalManager.kt   push init, click listener, external_id = AppsFlyer UID
+  PushManager.kt        FCM token fetched at launch, awaited briefly when the URL is built
+  PushService.kt        FCM: token refresh and incoming pushes
+  PushPayload.kt        the parts of a push the app acts on
 ui/
-  AetherRoot.kt         the startup gate
+  AetherRoot.kt         the startup gate (gate / painted / reroute)
   screens/OfferWebViewScreen.kt
 ```
 
-`CampaignParser`, `OfferUrlBuilder`, `RoutingRules`, `UrlSchemes` and
-`DeepLinkRouter` are free of Android imports, which is what lets the URL and
+`CampaignParser`, `OfferUrlBuilder`, `RoutingRules`, `OfferCache`, `UrlSchemes`
+and `DeepLinkRouter` are free of Android imports, which is what lets the URL and
 routing logic be tested on the JVM.
 
 ### Things that will bite otherwise
 
-* **Conversion data arrives once, on first install.** `attributionSettled` is
-  persisted and set on *failure* as well as success — otherwise every later
-  launch sits on the splash waiting for a callback that never comes.
-* **The probe must send the WebView's User-Agent.** With `Java/1.8.0` many offer
-  servers answer 404, the router reads that as White, pins it, and the install is
-  stuck on White forever.
-* **The probe is what the tracker sees, not the WebView.** `HttpOfferProbe`
-  follows the redirect chain itself and only the final landing page reaches the
-  WebView, so the click is registered by `HttpURLConnection`. That request
-  therefore carries `X-Requested-With: com.oroclub.game` on every hop — the
-  header a tracker reads to recognise in-app traffic. The WebView sets it too
+* **The WebView makes the click, not a probe.** There is no `HttpURLConnection`
+  probe. The WebView opens the campaign link, and `OfferWebViewClient` decides
+  from the **main-frame** response: a 404 pins White forever; anything else is
+  Black. Reading a sub-resource's 404, or a 404 the user later navigates into,
+  as White would strand the install — hence `request.isForMainFrame` and one
+  verdict per WebView.
+* **403/5xx and network errors are not the tracker's answer.** Only a real
+  main-frame 404 pins White. A 403 (WAF) or a network/TLS error on a fresh link
+  shows White for that launch and pins nothing, so the next launch retries.
+* **The branch is permanent, the address is not.** White is pinned through
+  `white_locked` with no reset. The offer address is cached for 24h and resets
+  itself; a dead cached page re-routes once to a fresh campaign link.
+  **Re-testing requires Clear data or a reinstall.**
+* **The X-Requested-With header still matters.** The WebView sets it
   (`WebSettingsCompat.setRequestedWithHeaderOriginAllowList(settings, setOf("*"))`
   before the first `loadUrl`, since WebView M108 stopped sending it by default,
-  plus a per-request header as a fallback), but that only matters for requests
-  the offer page makes on its own.
-* **On a debug build the header carries `com.oroclub.game.debug`,** because
-  `applicationIdSuffix = ".debug"` is part of the real package name. Verify
-  tracker stats against a release build.
-* **Permissive TLS belongs to the probe alone.** The relaxed `SSLSocketFactory`
-  and `HostnameVerifier` are set on that one `HttpsURLConnection`;
-  `setDefaultSSLSocketFactory` is never called and the WebView keeps standard
-  validation. The real fix is a correct `fullchain` on the server.
-* **The decision is sticky.** The first genuine HTTP answer pins the branch:
-  White through `whiteLocked`, Black through `cachedOfferUrl`. A network or TLS
-  *error* pins nothing, so the next launch retries. **Re-testing requires Clear
-  data or a reinstall.**
-* **The AppsFlyer UID is not ready synchronously.** It is captured in
-  `AppsFlyerRequestListener.onSuccess` and again in the conversion-data
-  callbacks, and a stored UID is never overwritten with null or empty. That UID
-  is `appsflyer_id` in the URL and `external_id` in OneSignal.
-* **`OneSignal.Notifications.requestPermission` is `suspend` in 5.x** and is
-  called from a coroutine, not from `onCreate` directly.
+  plus a per-request header as a fallback) so the tracker recognises in-app
+  traffic. On a debug build it carries `com.oroclub.game.debug`.
+* **The push token must reach the single click.** `PushManager` fetches the FCM
+  token in `Application.onCreate` and the URL builder waits briefly for it; a
+  token that missed the click leaves the install unreachable until reinstall.
+* **adid is not ready synchronously.** It arrives on `Adjust.getAdid`, and a
+  stored value is never overwritten with blank. It is `adid` in the URL.
 * `usesCleartextTraffic="true"` is what makes the WebView's
-  `MIXED_CONTENT_ALWAYS_ALLOW` mean anything from `targetSdk` 28 up, and stops
-  the probe throwing on an `http://` redirect.
-* `tools:replace="android:fullBackupContent,android:dataExtractionRules"` is
-  required because AppsFlyer's manifest declares its own and the merger fails on
-  the conflict otherwise.
+  `MIXED_CONTENT_ALWAYS_ALLOW` mean anything, and lets an `http://` redirect load.
+* `allowBackup="false"` with `tools:replace` covering `android:allowBackup` is
+  required: the Adjust SDK declares `allowBackup="true"`, and a restored
+  `white_locked` would close a brand-new install into White forever.

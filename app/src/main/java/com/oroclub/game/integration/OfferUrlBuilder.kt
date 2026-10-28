@@ -1,35 +1,38 @@
 package com.oroclub.game.integration
 
 /**
- * Assembles the offer URL from the base URL and everything AppsFlyer reported.
+ * Assembles the offer URL from the base URL and everything Adjust reported.
  *
  * Built by string concatenation on purpose: android.net.Uri.Builder percent-encodes
  * values that are already encoded, so a campaign carrying `%26` would reach the tracker
  * as `%2526`.
  *
- * Shape of the result:
+ * Two link shapes, chosen by [sub1InPath] (BuildConfig.OFFER_ROUTING):
  *
- *     https://domain.com/{sub1}?{every AppsFlyer param}&campaign={campaign}&sub1=..&subN=..&appsflyer_id=..
+ *   aso   : https://domain/{alias}?{every param}&campaign=..&sub1=..&subN=..&adid=..
+ *   prily : https://domain/{alias}/{sub1}?{every param}&campaign=..&sub1=..&subN=..&adid=..
  *
- * `sub1` appears twice on purpose - once as a path segment the tracker routes on, once as
- * a query parameter it reads. Neither replaces the other.
+ * In prily mode `sub1` appears twice on purpose - once as a path segment the tracker
+ * routes on, once as a query parameter it reads. Neither replaces the other.
  */
 object OfferUrlBuilder {
 
     private const val CAMPAIGN_KEY = "campaign"
-    private const val APPSFLYER_ID_KEY = "appsflyer_id"
+    private const val ADID_KEY = "adid"
     private const val SUB1_KEY = "sub1"
 
     /**
-     * @param extra parameters the app contributes itself (device signals). They are
-     *   applied last so a campaign long enough to produce its own `sub12` cannot end up
-     *   in the URL twice with two different values.
+     * @param extras parameters the app contributes itself (device signals, push token/id).
+     *   Applied last so a campaign long enough to produce its own `sub12` cannot end up in
+     *   the URL twice with two different values.
+     * @param sub1InPath true for the "prily" group: sub1 is also appended to the path.
      */
     fun build(
         baseUrl: String,
-        appsFlyerParams: Map<String, String>,
-        appsFlyerId: String?,
-        extra: Map<String, String> = emptyMap()
+        attribution: Map<String, String>,
+        adid: String?,
+        extras: Map<String, String> = emptyMap(),
+        sub1InPath: Boolean = false
     ): String {
         val base = baseUrl.trim()
         if (base.isEmpty()) return ""
@@ -45,33 +48,32 @@ object OfferUrlBuilder {
 
         val params = LinkedHashMap<String, String>()
         parseQuery(baseQuery, params)
-        // Every key AppsFlyer sent, in arrival order. Filtering to a known subset here is
-        // the single most common way this integration silently loses attribution.
-        params.putAll(appsFlyerParams)
+        // Every key Adjust sent, in arrival order. Filtering to a known subset here is the
+        // single most common way this integration silently loses attribution.
+        params.putAll(attribution)
 
-        val campaign = appsFlyerParams[CAMPAIGN_KEY].orEmpty()
+        val campaign = attribution[CAMPAIGN_KEY].orEmpty()
         val subs = CampaignParser.parse(campaign)
 
         // The tracker reads the raw campaign as well as the exploded parts, so it stays.
         if (campaign.isNotEmpty()) params[CAMPAIGN_KEY] = campaign
 
-        // Parsed subs win over any sub1..subN AppsFlyer happened to send itself.
-        // Re-putting an existing key replaces the value in place, so ordering stays
-        // deterministic and no query key is emitted twice.
+        // Parsed subs win over any sub1..subN that arrived whole. Re-putting an existing
+        // key replaces the value in place, so ordering stays deterministic and no query
+        // key is emitted twice.
         params.putAll(subs)
 
         // The app's own signals win over a same-named campaign segment: a campaign of 12
         // or more segments produces its own sub12, and which of two identical keys the
-        // tracker reads is undefined. Re-putting replaces the value in place, so the
-        // campaign's position in the query is preserved and no key is emitted twice.
-        params.putAll(extra)
+        // tracker reads is undefined. Re-putting replaces the value in place.
+        params.putAll(extras)
 
-        // A blank id would reach the tracker as an empty appsflyer_id, which reads as
+        // A blank adid would reach the tracker as an empty value, which reads as
         // "attributed to nothing" rather than "not known yet".
-        if (!appsFlyerId.isNullOrBlank()) params[APPSFLYER_ID_KEY] = appsFlyerId.trim()
+        if (!adid.isNullOrBlank()) params[ADID_KEY] = adid.trim()
 
         // sub1 stays in the query as well - appending it to the path does not consume it.
-        val finalPath = appendSub1(path, params[SUB1_KEY].orEmpty())
+        val finalPath = if (sub1InPath) appendSub1(path, params[SUB1_KEY].orEmpty()) else path
         val query = CampaignParser.toQuery(params)
 
         return buildString {

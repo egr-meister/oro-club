@@ -1,7 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Only the local progress file is eligible for backup. Nothing else exists. -->
+<!--
+  Backup is turned off app-wide (allowBackup=false). This file is the second line of
+  defence if it is ever turned back on, and it applies below API 31.
+
+  The integration prefs and the Adjust prefs must never be backed up: a restored
+  white_locked flag closes a brand new install into White permanently, and a restored
+  identifier makes a fresh install look like the old one to the tracker. Only the local
+  game progress is eligible.
+-->
 <full-backup-content>
     <include
         domain="file"
         path="datastore/oro_club_progress.preferences_pb" />
+    <exclude
+        domain="sharedpref"
+        path="integration_prefs.xml" />
+    <exclude
+        domain="sharedpref"
+        path="adjust_preferences.xml" />
 </full-backup-content>

@@ -1,13 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  Applies on API 31+. Backup is off app-wide; this is the second line of defence.
+  The integration prefs and the Adjust prefs are excluded from both cloud backup and
+  device transfer: a restored white_locked flag would close a brand new install into
+  White forever, and a restored identifier would misattribute it.
+-->
 <data-extraction-rules>
     <cloud-backup>
         <include
             domain="file"
             path="datastore/oro_club_progress.preferences_pb" />
+        <exclude
+            domain="sharedpref"
+            path="integration_prefs.xml" />
+        <exclude
+            domain="sharedpref"
+            path="adjust_preferences.xml" />
     </cloud-backup>
     <device-transfer>
         <include
             domain="file"
             path="datastore/oro_club_progress.preferences_pb" />
+        <exclude
+            domain="sharedpref"
+            path="integration_prefs.xml" />
+        <exclude
+            domain="sharedpref"
+            path="adjust_preferences.xml" />
     </device-transfer>
 </data-extraction-rules>

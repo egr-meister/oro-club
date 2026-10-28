@@ -7,23 +7,26 @@ import org.junit.Test
 
 class OfferUrlBuilderTest {
 
-    private val referenceParams = linkedMapOf(
-        "af_status" to "Non-organic",
-        "media_source" to "facebook",
+    private val referenceAttribution = linkedMapOf(
+        "network" to "unityads",
+        "tracker_name" to "Oro Club",
         "campaign" to "android1_AR_sub3%26_sub4_WBZ_sub6"
     )
 
+    // --- prily mode (sub1 in the path) ---------------------------------------
+
     @Test
-    fun `the reference URL carries every part`() {
+    fun `prily reference URL carries every part`() {
         val url = OfferUrlBuilder.build(
             baseUrl = "https://secret-joker.cfd/",
-            appsFlyerParams = referenceParams,
-            appsFlyerId = "test-af-id"
+            attribution = referenceAttribution,
+            adid = "test-adid",
+            sub1InPath = true
         )
 
         assertTrue("path segment missing: $url", url.startsWith("https://secret-joker.cfd/android1?"))
-        assertTrue(url.contains("af_status=Non-organic"))
-        assertTrue(url.contains("media_source=facebook"))
+        assertTrue(url.contains("network=unityads"))
+        assertTrue(url.contains("tracker_name=Oro"))
         assertTrue("campaign was dropped: $url", url.contains("campaign=android1_AR_sub3%26_sub4_WBZ_sub6"))
         assertTrue(url.contains("&sub1=android1"))
         assertTrue(url.contains("sub2=AR"))
@@ -31,20 +34,70 @@ class OfferUrlBuilderTest {
         assertTrue(url.contains("sub4=sub4"))
         assertTrue(url.contains("sub5=WBZ"))
         assertTrue(url.contains("sub6=sub6"))
-        assertTrue(url.contains("appsflyer_id=test-af-id"))
+        assertTrue(url.contains("adid=test-adid"))
         assertFalse("double encoding: $url", url.contains("%2526"))
     }
 
     @Test
-    fun `no AppsFlyer parameter is ever lost`() {
+    fun `prily keeps sub1 in the path and in the query at once`() {
+        val url = OfferUrlBuilder.build("https://d.cfd/", referenceAttribution, null, sub1InPath = true)
+        assertTrue(url.startsWith("https://d.cfd/android1?"))
+        assertTrue(url.contains("&sub1=android1"))
+    }
+
+    @Test
+    fun `prily with an empty sub1 adds no path segment`() {
+        val url = OfferUrlBuilder.build(
+            baseUrl = "https://d.cfd/",
+            attribution = linkedMapOf("campaign" to "_AR_WBZ", "network" to "fb"),
+            adid = null,
+            sub1InPath = true
+        )
+        assertTrue("unexpected path segment: $url", url.startsWith("https://d.cfd/?"))
+        assertTrue(url.contains("network=fb"))
+        assertTrue(url.contains("campaign=_AR_WBZ"))
+        assertTrue(url.contains("sub2=AR"))
+        assertTrue(url.contains("sub3=WBZ"))
+    }
+
+    @Test
+    fun `prily keeps an existing base path and appends sub1`() {
+        val url = OfferUrlBuilder.build(
+            baseUrl = "https://domain.com/offer/",
+            attribution = linkedMapOf("campaign" to "test"),
+            adid = null,
+            sub1InPath = true
+        )
+        assertTrue(url.startsWith("https://domain.com/offer/test?"))
+    }
+
+    @Test
+    fun `prily building twice over its own output does not duplicate the segment`() {
+        val once = OfferUrlBuilder.build("https://d.cfd/", referenceAttribution, "adid-1", sub1InPath = true)
+        val twice = OfferUrlBuilder.build(once, referenceAttribution, "adid-1", sub1InPath = true)
+        assertTrue(twice.startsWith("https://d.cfd/android1?"))
+        assertFalse(twice.contains("/android1/android1"))
+    }
+
+    // --- aso mode (path untouched) -------------------------------------------
+
+    @Test
+    fun `aso does not touch the path`() {
+        val url = OfferUrlBuilder.build("https://d.cfd/", referenceAttribution, null, sub1InPath = false)
+        assertTrue(url.startsWith("https://d.cfd/?"))
+        assertTrue("sub1 must still be in the query", url.contains("sub1=android1"))
+        assertFalse("no path segment in aso: $url", url.startsWith("https://d.cfd/android1"))
+    }
+
+    // --- shared rules --------------------------------------------------------
+
+    @Test
+    fun `no attribution parameter is ever lost`() {
         val params = linkedMapOf(
-            "af_status" to "Organic",
-            "media_source" to "restricted",
+            "network" to "restricted",
             "campaign" to "x_y",
-            "af_siteid" to "123",
+            "tracker_token" to "abc123",
             "some_future_key" to "value",
-            "install_time" to "2026-09-01 12:00:00.000",
-            "is_first_launch" to "true",
             "blank_on_purpose" to ""
         )
         val url = OfferUrlBuilder.build("https://d.cfd/", params, null)
@@ -62,65 +115,17 @@ class OfferUrlBuilderTest {
     }
 
     @Test
-    fun `sub1 is in the path and in the query at the same time`() {
-        val url = OfferUrlBuilder.build("https://d.cfd/", referenceParams, null)
-        assertTrue(url.startsWith("https://d.cfd/android1?"))
-        assertTrue(url.contains("&sub1=android1"))
-    }
-
-    @Test
-    fun `a missing campaign adds no path segment`() {
+    fun `extras win over same-named campaign segments`() {
+        // A 12+ segment campaign produces its own sub12; the device signal must win.
+        val longCampaign = (1..13).joinToString("_") { "seg$it" }
         val url = OfferUrlBuilder.build(
             baseUrl = "https://d.cfd/",
-            appsFlyerParams = linkedMapOf("af_status" to "Organic"),
-            appsFlyerId = "af-1"
+            attribution = linkedMapOf("campaign" to longCampaign),
+            adid = null,
+            extras = linkedMapOf("sub12" to "85_true")
         )
-        assertTrue(url.startsWith("https://d.cfd/?"))
-        assertTrue(url.contains("af_status=Organic"))
-        assertTrue(url.contains("appsflyer_id=af-1"))
-        assertFalse(url.contains("sub1="))
-    }
-
-    @Test
-    fun `an empty sub1 adds no path segment but keeps the other parameters`() {
-        val url = OfferUrlBuilder.build(
-            baseUrl = "https://d.cfd/",
-            appsFlyerParams = linkedMapOf("campaign" to "_AR_WBZ", "media_source" to "fb"),
-            appsFlyerId = null
-        )
-        assertTrue("unexpected path segment: $url", url.startsWith("https://d.cfd/?"))
-        assertTrue(url.contains("media_source=fb"))
-        assertTrue(url.contains("campaign=_AR_WBZ"))
-        assertTrue(url.contains("sub2=AR"))
-        assertTrue(url.contains("sub3=WBZ"))
-    }
-
-    @Test
-    fun `an existing base path keeps its segments and gains sub1 at the end`() {
-        val url = OfferUrlBuilder.build(
-            baseUrl = "https://domain.com/offer/",
-            appsFlyerParams = linkedMapOf("campaign" to "test"),
-            appsFlyerId = null
-        )
-        assertTrue(url.startsWith("https://domain.com/offer/test?"))
-    }
-
-    @Test
-    fun `a base path without a trailing slash also gains sub1`() {
-        val url = OfferUrlBuilder.build(
-            baseUrl = "https://domain.com/offer",
-            appsFlyerParams = linkedMapOf("campaign" to "test"),
-            appsFlyerId = null
-        )
-        assertTrue(url.startsWith("https://domain.com/offer/test?"))
-    }
-
-    @Test
-    fun `building twice over its own output does not duplicate the path segment`() {
-        val once = OfferUrlBuilder.build("https://d.cfd/", referenceParams, "af-1")
-        val twice = OfferUrlBuilder.build(once, referenceParams, "af-1")
-        assertTrue(twice.startsWith("https://d.cfd/android1?"))
-        assertFalse(twice.contains("/android1/android1"))
+        assertTrue(url.contains("sub12=85_true"))
+        assertEquals("sub12 must not appear twice", 1, url.split("sub12=").size - 1)
     }
 
     @Test
@@ -134,7 +139,6 @@ class OfferUrlBuilderTest {
         assertTrue(url.contains("sub1=android1"))
         assertTrue(url.contains("sub2=AR"))
         assertFalse(url.contains("stale"))
-        // Re-putting an existing key replaces it in place, so no key is emitted twice.
         assertEquals(1, url.split("sub1=").size - 1)
     }
 
@@ -142,34 +146,33 @@ class OfferUrlBuilderTest {
     fun `query parameters already on the base URL survive`() {
         val url = OfferUrlBuilder.build(
             baseUrl = "https://d.cfd/land?utm=x",
-            appsFlyerParams = linkedMapOf("campaign" to "one"),
-            appsFlyerId = null
+            attribution = linkedMapOf("campaign" to "one"),
+            adid = null
         )
-        assertTrue(url.startsWith("https://d.cfd/land/one?"))
         assertTrue(url.contains("utm=x"))
+        assertTrue(url.contains("campaign=one"))
     }
 
     @Test
     fun `a fragment on the base URL is preserved at the end`() {
         val url = OfferUrlBuilder.build(
             baseUrl = "https://d.cfd/#promo",
-            appsFlyerParams = linkedMapOf("campaign" to "one"),
-            appsFlyerId = null
+            attribution = linkedMapOf("campaign" to "one"),
+            adid = null
         )
-        assertTrue(url.startsWith("https://d.cfd/one?"))
         assertTrue(url.endsWith("#promo"))
     }
 
     @Test
-    fun `a blank appsflyer id is not emitted`() {
-        val url = OfferUrlBuilder.build("https://d.cfd/", referenceParams, "   ")
-        assertFalse(url.contains("appsflyer_id"))
+    fun `a blank adid is not emitted`() {
+        val url = OfferUrlBuilder.build("https://d.cfd/", referenceAttribution, "   ")
+        assertFalse(url.contains("adid"))
     }
 
     @Test
     fun `a blank base URL yields an empty result rather than a broken one`() {
-        assertEquals("", OfferUrlBuilder.build("", referenceParams, "af-1"))
-        assertEquals("", OfferUrlBuilder.build("   ", referenceParams, "af-1"))
+        assertEquals("", OfferUrlBuilder.build("", referenceAttribution, "adid-1"))
+        assertEquals("", OfferUrlBuilder.build("   ", referenceAttribution, "adid-1"))
     }
 
     @Test

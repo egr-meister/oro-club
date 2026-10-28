@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Integration layer chrome -->
+    <string name="loading">CARGANDO</string>
+    <string name="offer_error_title">Algo salió mal</string>
+    <string name="offer_error_body">No se pudo cargar la página. Comprueba tu conexión e inténtalo de nuevo.</string>
+    <string name="retry">REINTENTAR</string>
+
+    <!-- Shared buttons -->
+    <string name="btn_continue">CONTINUAR</string>
+    <string name="btn_restart">REINICIAR</string>
+    <string name="btn_menu">MENÚ</string>
+    <string name="btn_back">ATRÁS</string>
+    <string name="btn_next_level">SIGUIENTE NIVEL</string>
+    <string name="a11y_back">Atrás</string>
+    <string name="a11y_pause">Pausa</string>
+
+    <!-- Main -->
+    <string name="main_tagline">TOMA ASIENTO EN LA MESA DORADA</string>
+    <string name="main_enter">ENTRAR AL CLUB</string>
+
+    <!-- Menu -->
+    <string name="menu_title">El Club</string>
+    <string name="menu_pick">Elige tu mesa</string>
+    <string name="menu_quiz">CUESTIONARIO</string>
+    <string name="menu_pairs">PAREJAS</string>
+    <string name="menu_results">RESULTADOS</string>
+    <string name="menu_rules">REGLAS DEL JUEGO</string>
+    <string name="menu_settings">AJUSTES</string>
+
+    <!-- Levels -->
+    <string name="levels_title">Encuentra las parejas</string>
+    <string name="levels_cleared_count">%1$d de %2$d niveles superados</string>
+    <string name="level_cleared">SUPERADO</string>
+    <string name="level_locked">BLOQUEADO</string>
+    <string name="level_pairs_count">%1$d parejas</string>
+
+    <!-- Quiz categories -->
+    <string name="quiz_title">Cuestionario</string>
+    <string name="quiz_intro">Diez preguntas por mazo. Responde, y la mesa te responde.</string>
+    <string name="quiz_none">No hay mazos de cuestionario disponibles en esta versión.</string>
+    <string name="quiz_best">Récord %1$d/%2$d</string>
+    <string name="quiz_play">JUGAR</string>
+
+    <!-- Quiz round -->
+    <string name="quiz_score_so_far">Puntuación: %1$d</string>
+
+    <!-- Quiz results -->
+    <string name="quiz_result_round_over">Ronda terminada</string>
+    <string name="quiz_result_flawless">Una mano perfecta</string>
+    <string name="quiz_result_approves">El comodín lo aprueba</string>
+    <string name="quiz_result_fair">Una buena ronda</string>
+    <string name="quiz_result_unkind">El mazo fue cruel</string>
+    <string name="quiz_result_score">Puntuación: %1$d/%2$d</string>
+
+    <!-- Pairs round -->
+    <string name="pairs_level_title">Nivel %1$d</string>
+    <string name="pairs_counter">Parejas %1$d/%2$d</string>
+
+    <!-- Pairs results -->
+    <string name="pairs_well_done">Bien hecho</string>
+    <string name="pairs_out_of_time">Tiempo agotado</string>
+    <string name="pairs_level_cleared">Nivel %1$d superado</string>
+    <string name="pairs_level_not_cleared">Nivel %1$d no superado</string>
+    <string name="pairs_matched">Parejas encontradas: %1$d/%2$d</string>
+    <string name="pairs_next_open">La siguiente mesa está abierta.</string>
+    <string name="pairs_all_cleared">Todas las mesas del club están superadas.</string>
+    <string name="pairs_try_again">Prueba la misma mesa otra vez — el mazo se baraja de nuevo.</string>
+
+    <!-- Results summary -->
+    <string name="results_title">Resultados</string>
+    <string name="results_no_decks">No hay mazos de cuestionario disponibles.</string>
+    <string name="results_levels_cleared">Niveles superados</string>
+    <string name="results_progress_note">El progreso se guarda solo en este dispositivo. Nunca se sube a ningún sitio.</string>
+
+    <!-- Rules -->
+    <string name="rules_title">Reglas del juego</string>
+    <string name="rules_quiz_title">Cuestionario</string>
+    <string name="rules_quiz_body">Elige uno de los tres mazos temáticos. Cada mazo tiene diez preguntas con una sola respuesta correcta. Toca una respuesta y se revela al instante — la opción correcta se marca con una señal y una elección incorrecta con una cruz — y luego la siguiente pregunta llega sola. Se guarda tu mejor puntuación por mazo.</string>
+    <string name="rules_pairs_title">Encuentra las parejas</string>
+    <string name="rules_pairs_body">Nueve niveles, cada uno con más cartas y más tiempo. Voltea dos cartas: una pareja igual queda boca arriba, un fallo se vuelve a voltear. Encuentra todas las parejas antes de que acabe el tiempo para superar el nivel. Termina un nivel para desbloquear el siguiente.</string>
+    <string name="rules_pause_title">Pausa</string>
+    <string name="rules_pause_body">Toca la ficha de pausa cuando quieras. El tiempo se detiene mientras el panel está abierto, y puedes continuar, reiniciar la ronda o volver al menú.</string>
+    <string name="rules_progress_title">Tu progreso</string>
+    <string name="rules_progress_body">Las mejores puntuaciones del cuestionario, los niveles superados y el interruptor de sonido se guardan en este dispositivo y en ningún otro sitio. Restablécelos cuando quieras desde los ajustes.</string>
+    <string name="rules_fair_title">Juego limpio</string>
+    <string name="rules_fair_body">Oro Club es un juego para un jugador y de entretenimiento. No hay apuestas, ni juego con dinero real, ni premios, ni ningún componente en línea.</string>
+    <string name="rules_footer">Oro Club — El club dorado del comodín</string>
+
+    <!-- Pause overlay -->
+    <string name="pause_title">En pausa</string>
+    <string name="pause_body">La mesa espera. Tómate tu tiempo.</string>
+
+    <!-- Fallback -->
+    <string name="fallback_nothing">Nada que mostrar</string>
+    <string name="fallback_quiz_deck">Ese mazo de cuestionario ya no está disponible.</string>
+    <string name="fallback_quiz_results">Estos resultados pertenecen a un mazo que ya no está disponible.</string>
+    <string name="fallback_level">Ese nivel no existe en esta versión.</string>
+    <string name="fallback_level_results">Estos resultados pertenecen a un nivel que ya no existe.</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Ajustes</string>
+    <string name="settings_sound">Efectos de sonido</string>
+    <string name="settings_on">Activado</string>
+    <string name="settings_off">Desactivado</string>
+    <string name="settings_theme">Tema</string>
+    <string name="settings_theme_system">Sistema</string>
+    <string name="settings_theme_light">Claro</string>
+    <string name="settings_theme_dark">Oscuro</string>
+    <string name="settings_language">Idioma</string>
+    <string name="settings_language_system">Idioma del sistema</string>
+    <string name="settings_privacy_note">Tu progreso — mejores puntuaciones, niveles superados y estos ajustes — se guarda solo en este dispositivo. No hay cuenta.</string>
+    <string name="settings_policy">PRIVACIDAD</string>
+    <string name="settings_support">SOPORTE</string>
+    <string name="settings_reset">BORRAR PROGRESO</string>
+    <string name="settings_fairplay_note">Oro Club es un juego de cuestionario y memoria para divertirse. Sin juego con dinero real, sin apuestas y sin premios.</string>
+    <string name="settings_reset_confirm_title">¿Borrar el progreso?</string>
+    <string name="settings_reset_confirm_body">Se borrarán las mejores puntuaciones y los niveles superados. Esta acción no se puede deshacer.</string>
+    <string name="settings_reset_yes">SÍ, BORRAR</string>
+    <string name="settings_cancel">CANCELAR</string>
+    <string name="a11y_policy">Política de privacidad, se abre en tu navegador</string>
+    <string name="a11y_support">Soporte, se abre en tu navegador</string>
+</resources>

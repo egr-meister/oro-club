@@ -34,11 +34,13 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.unit.dp
 import com.oroclub.game.ui.Assets
+import com.oroclub.game.R
 import com.oroclub.game.ui.components.OroScreen
 import com.oroclub.game.ui.components.PauseOverlay
 import com.oroclub.game.ui.components.PauseWhenBackgrounded
@@ -72,7 +74,7 @@ fun PairsScreen(
     PauseWhenBackgrounded(onLeaveForeground = onLeaveForeground)
 
     Box(modifier = Modifier.fillMaxSize()) {
-        OroScreen(title = "Level ${state.level}", onBack = onBack, onPause = onPause) {
+        OroScreen(title = stringResource(R.string.pairs_level_title, state.level), onBack = onBack, onPause = onPause) {
             Column(modifier = Modifier.fillMaxSize()) {
                 Row(
                     modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
@@ -80,7 +82,7 @@ fun PairsScreen(
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     Text(
-                        text = "Pairs ${state.matchedPairs}/${state.totalPairs}",
+                        text = stringResource(R.string.pairs_counter, state.matchedPairs, state.totalPairs),
                         color = Gold,
                         style = MaterialTheme.typography.titleMedium
                     )
