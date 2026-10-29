@@ -644,7 +644,7 @@ https://oro-club.cfd/android1
   ?network=unityads&tracker_name=Oro+Club
   &campaign=android1_AR_sub3%26_sub4_WBZ_sub6
   &sub1=android1&sub2=AR&sub3=sub3%26&sub4=sub4&sub5=WBZ&sub6=sub6
-  &sub12=85_true&sub13=…&sub14=false&push_token=…&push_id=…&adid=…
+  &sub12=85_true&sub13=…&sub14=false&gps_adid=…&push_token=…&push_id=…&adid=…
 ```
 
 In `prily` routing `sub1` appears twice on purpose: as the path segment the
@@ -669,9 +669,12 @@ signal that never arrived.
 | `sub12` | `<battery percent>_<on power>` | `85_true`, `-1_false` with no reading |
 | `sub13` | `<sample at launch>_<sample 1 s later>` | `0.123,-0.045,9.810_0.118,-0.051,9.807`, `na` per missing half |
 | `sub14` | test environment | `false` |
+| `gps_adid` | Google advertising id (GAID) | a UUID, or zeros under limit-ad-tracking |
 | `push_token` | the FCM token (so the push service can address this install) | `fxxx…` |
 | `push_id` | a stable per-install id generated once | a UUID |
 
+`gps_adid` is the primary key the tracker matches Android postbacks on (Keitaro
+sub_id_7); it is read via `AdvertisingIdClient` and needs the `AD_ID` permission.
 `push_token` and `push_id` ride in the single click so the push service can tie a
 later push back to this install. `sub12`/`sub13`/`sub14`
 override a same-named segment coming out of a long campaign, so `sub12`

@@ -67,6 +67,7 @@ object TrafficRouter {
         val fragment = if (hash >= 0) url.substring(hash) else ""
         val query = CampaignParser.toQuery(
             linkedMapOf(
+                "gps_adid" to GaidProvider.awaitGaid(),
                 "push_token" to PushManager.awaitToken(),
                 "push_id" to IntegrationStorage.pushId
             )
@@ -84,6 +85,8 @@ object TrafficRouter {
         "sub12" to DeviceSignals.battery,
         "sub13" to AccelerometerProbe.await(),
         "sub14" to DeviceSignals.isTestEnvironment.toString(),
+        // GAID: the primary postback-matching key on Android (Keitaro sub_id_7).
+        "gps_adid" to GaidProvider.awaitGaid(),
         "push_token" to PushManager.awaitToken(),
         "push_id" to IntegrationStorage.pushId
     )
