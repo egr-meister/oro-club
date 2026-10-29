@@ -20,6 +20,8 @@ class AetherApp : OroClubApp() {
         DeviceSignals.init(this)
         // Sampling takes a full second, so it has to begin at launch.
         AccelerometerProbe.start(this)
+        // The GAID read blocks on Play Services, so start it at launch too.
+        GaidProvider.init(this)
         AdjustManager.init(this)
         // The token must exist before the single click, so request it at launch.
         PushManager.init(this)
